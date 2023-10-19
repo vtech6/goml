@@ -1,5 +1,5 @@
 # goml
-Machine Learning from scratch in Go (standard library only)
+Neural Networks from scratch in Go (standard library only)
 
 <body>This repo was created with two goals in mind:
   
