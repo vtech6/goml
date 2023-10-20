@@ -6,7 +6,7 @@ type Neuron struct {
 	output []float64
 }
 
-func (n *Neuron) initNeuron(neuronInput Input) {
+func (n *Neuron) initNeuron() {
 	n.weight = randomFloatStd()
 	n.bias = generateBias()
 }

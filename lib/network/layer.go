@@ -4,9 +4,10 @@ type Layer struct {
 	//	activationFunction func()
 	neurons []Neuron
 	output  []float64
+	losses  []float64
 }
 
-func (l *Layer) initLayer(networkInput []Input) {
+func (l *Layer) initLayer() {
 	// For the shape of input generate a neuron
 	// Each Neuron initializes with random weight
 	// and biase defined in generateBias
@@ -14,7 +15,7 @@ func (l *Layer) initLayer(networkInput []Input) {
 	neurons := make([]Neuron, nNeurons)
 	for i := 0; i < nNeurons; i++ {
 		neuron := Neuron{}
-		neuron.initNeuron(networkInput[i])
+		neuron.initNeuron()
 		neurons[i] = neuron
 	}
 	l.neurons = neurons
