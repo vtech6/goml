@@ -1,12 +1,14 @@
 package network
 
-import "math/rand"
+//import "math/rand"
 
 func randomFloatStd() float64 {
-	return rand.Float64()*2 - 1
+	// return rand.Float64()*2 - 1
+	return 1
 }
 
 func generateBias() float64 {
+	// return randomFloatStd()
 	return 1
 }
 

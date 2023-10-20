@@ -35,3 +35,10 @@ func (l *Layer) outputFunc() {
 	}
 	l.output = output
 }
+
+func (l *Layer) backpropagate(loss float64) {
+	for i := 0; i < len(l.neurons); i++ {
+		l.neurons[i].weight = l.neurons[i].weight * loss
+		l.neurons[i].bias = l.neurons[i].bias * loss
+	}
+}

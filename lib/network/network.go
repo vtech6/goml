@@ -12,24 +12,52 @@ type Input struct {
 
 func Run() {
 
-	networkInput := []Input{{x: []float64{0, 0}, y: []float64{0}},
-		{x: []float64{0, 1}, y: []float64{1}},
-		{x: []float64{1, 0}, y: []float64{1}},
-		{x: []float64{1, 1}, y: []float64{0}}}
+	//	minimalNetworkInput := []Input{{x: []float64{0, 0}, y: []float64{0}},
+	//		{x: []float64{0, 1}, y: []float64{1}},
+	//		{x: []float64{1, 0}, y: []float64{1}},
+	//		{x: []float64{1, 1}, y: []float64{0}}}
 
-	layer := Layer{neurons: []Neuron{}}
+	trainSet, testSet := generateLinearData(10)
+	l := train(trainSet, 50)
 
-	output := make([]float64, len(networkInput))
-	layer.initLayer(networkInput)
-	for i := 0; i < len(networkInput); i++ {
-		layer.feedForward(networkInput[i].x)
-		layer.outputFunc()
-		output[i] = average(layer.output)
+	fmt.Println("-------")
+	l.test(testSet)
+}
 
-		loss := meanSquaredError(layer.output, networkInput[i].y[0])
-		fmt.Println(loss)
+func (l *Layer) test(testSet []Input) {
+	for i := 0; i < len(testSet); i++ {
+		l.feedForward(testSet[i].x)
+		l.outputFunc()
+		fmt.Println("Target: ", testSet[i].y, ", Prediction: ", average(l.output))
 	}
+}
 
-	fmt.Println(output)
+func train(networkInput []Input, epochs int) *Layer {
+	layer := Layer{neurons: []Neuron{}}
+	//	learningRate := 0.01
 
+	layerOutput := make([]float64, len(networkInput))
+	layer.initLayer(networkInput)
+
+	for epoch := 0; epoch < epochs; epoch++ {
+		accuracy := 0.0
+		losses := make([]float64, len(networkInput))
+		for i := 0; i < len(networkInput); i++ {
+			layer.feedForward(networkInput[i].x)
+			layer.outputFunc()
+			layerOutput[i] = average(layer.output)
+			losses[i] = meanSquaredError(layer.output, networkInput[i].y[0])
+			accuracy += (layerOutput[i] / networkInput[i].y[0])
+		}
+		loss := average(losses)
+
+		accuracy = accuracy / float64(len(networkInput))
+		fmt.Println("Loss (MSE):", loss, ", MSE: ", accuracy)
+
+		layer.backpropagate(1)
+		//for i := 0; i < len(networkInput); i++ {
+		//	fmt.Println("Target: ", networkInput[i].y, ", Prediction: ", layerOutput[i])
+		//	}
+	}
+	return &layer
 }
