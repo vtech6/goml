@@ -17,24 +17,15 @@ func Run() {
 	//		{x: []float64{1, 0}, y: []float64{1}},
 	//		{x: []float64{1, 1}, y: []float64{0}}}
 
-	trainSet, testSet := generateLinearData(10)
-	l := train(trainSet, 50)
+	trainSet, testSet := generateLinearData(100)
+	l := train(trainSet, 10)
 
-	fmt.Println("-------")
 	l.test(testSet)
-}
-
-func (l *Layer) test(testSet []Input) {
-	for i := 0; i < len(testSet); i++ {
-		l.feedForward(testSet[i].x)
-		l.outputFunc()
-		fmt.Println("Target: ", testSet[i].y, ", Prediction: ", average(l.output))
-	}
 }
 
 func train(networkInput []Input, epochs int) *Layer {
 	layer := Layer{neurons: []Neuron{}}
-	//	learningRate := 0.01
+	learningRate := 0.01
 
 	layerOutput := make([]float64, len(networkInput))
 	layer.initLayer(networkInput)
@@ -54,7 +45,7 @@ func train(networkInput []Input, epochs int) *Layer {
 		accuracy = accuracy / float64(len(networkInput))
 		fmt.Println("Loss (MSE):", loss, ", MSE: ", accuracy)
 
-		layer.backpropagate(1)
+		layer.backpropagate(1 - (loss * learningRate))
 		//for i := 0; i < len(networkInput); i++ {
 		//	fmt.Println("Target: ", networkInput[i].y, ", Prediction: ", layerOutput[i])
 		//	}
