@@ -29,23 +29,10 @@ func Run() {
 }
 
 func testFunc() {
-	var value Value
-	x1 := value.init(2.0)
-	x2 := value.init(0.0)
-
-	w1 := value.init(-3.0)
-	w2 := value.init(1.0)
-
-	bias := value.init(6.8813735870195432)
-	x1w1 := x1.multiply(w1)
-	x2w2 := x2.multiply(w2)
-	x1w1x2w2 := x1w1.add(x2w2)
-	n := x1w1x2w2.add(bias)
-	output := n.tanh()
-	output.gradient = 1.0
-	output.backward()
-	output.calculateGradients()
-	fmt.Println(output.gradient, n.gradient)
+	neuron := Neuron{}
+	neuron.initNeuron(2)
+	neuron.calculateOutput([]float64{0.5, 0.8})
+	fmt.Println(neuron.activation)
 }
 
 func initNetwork() Network {
@@ -99,11 +86,9 @@ func (n *Network) networkFeedForward(networkInput []Input) {
 			} else {
 
 				//Else process the output of the previous layer
-				n.layers[layerIndex].feedForward(n.layers[layerIndex-1].output)
 			}
 			n.layers[layerIndex].outputFunc()
 		}
 
-		n.output[i] = average(n.layers[len(n.layers)-1].output)
 	}
 }

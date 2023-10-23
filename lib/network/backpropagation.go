@@ -25,8 +25,5 @@ func (n *Network) networkBackpropagate(networkInput []Input) {
 }
 
 func (l *Layer) backpropagate(networkInput Input, lastLayer bool, nextLayer *Layer) {
-	loss := 1.1
-	for i := 0; i < len(l.neurons); i++ {
-		l.neurons[i].bias = l.neurons[i].bias * (-loss)
-	}
+
 }

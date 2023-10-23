@@ -13,7 +13,7 @@ func randomFloatStd() float64 {
 	if TestMode == true {
 		return 1
 	} else {
-		return rand.Float64()
+		return (rand.Float64() * 2) - 1
 	}
 }
 
@@ -22,7 +22,7 @@ func generateBias() float64 {
 
 		return 0
 	} else {
-		return rand.Float64()
+		return randomFloatStd()
 	}
 }
 
@@ -73,20 +73,6 @@ func normalizeData(arr []Input) []Input {
 		normalizedArr[i].y[0] = arr[i].y[0] / maxY
 	}
 	return normalizedArr
-}
-
-func zip(arr1 []float64, arr2 []float64) ([][]float64, int) {
-	output := make([][]float64, len(arr1))
-	maxLen := len(arr1)
-	if len(arr2) < len(arr1) {
-		maxLen = len(arr2)
-	}
-	for i := 0; i < maxLen; i++ {
-		output[i] = make([]float64, 2)
-		output[i][0] = arr1[i]
-		output[i][1] = arr2[i]
-	}
-	return output, maxLen
 }
 
 func contains[T comparable](s []T, e T) bool {

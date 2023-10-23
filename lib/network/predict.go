@@ -11,11 +11,9 @@ func (n *Network) networkPredict(networkInputX []float64) {
 				n.layers[layerIndex].feedForward([]float64{networkInputX[i]})
 			} else {
 				//Else process the output of the previous layer
-				n.layers[layerIndex].feedForward(n.layers[layerIndex-1].output)
 			}
 			n.layers[layerIndex].outputFunc()
 		}
-		predictions[i] = average(n.layers[len(n.layers)-1].output)
 		fmt.Println("Source: ", networkInputX[i], ", Prediction: ", predictions[i])
 	}
 }

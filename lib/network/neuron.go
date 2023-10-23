@@ -6,31 +6,34 @@ import (
 )
 
 type Neuron struct {
-	weights    []float64
-	bias       float64
+	weights    []*Value
+	bias       *Value
 	output     []float64
 	delta      float64
-	activation float64
+	activation *Value
 }
 
 func (n *Neuron) initNeuron(inputLength int) {
-	n.weights = make([]float64, inputLength)
+	var value Value
+	n.weights = make([]*Value, inputLength)
 	for i := 0; i < inputLength; i++ {
-		n.weights[i] = randomFloatStd()
+		n.weights[i] = value.init(randomFloatStd())
 	}
-	n.bias = generateBias()
+	n.bias = value.init(randomFloatStd())
 	n.output = make([]float64, inputLength)
 }
 
 func (n *Neuron) calculateOutput(neuronInput []float64) {
-	output := n.bias
-	zipped, maxLen := zip(n.weights, neuronInput)
-	for i := 0; i < maxLen; i++ {
-		output += zipped[i][0] * zipped[i][1]
-		n.output[i] = sigmoid(output)
+	var value Value
+	activation := value.init(0.0)
+	for i := 0; i < len(neuronInput); i++ {
+
+		output := n.weights[i].multiply(value.init(neuronInput[i]))
+		output = output.add(n.bias)
+		activation = activation.add(output)
 
 	}
-	n.activation = sigmoid(output)
+	n.activation = activation
 
 }
 
@@ -47,7 +50,6 @@ func (v *Value) init(value float64) *Value {
 	newValue.operation = "INIT"
 	newValue.gradient = 0.0
 	newValue.backward = func() {
-		fmt.Println("NOTHING")
 	}
 	return &newValue
 
@@ -58,7 +60,6 @@ func (v *Value) multiply(input *Value) *Value {
 	output.backward = func() {
 		v.gradient += input.value * output.gradient
 		input.gradient += v.value * output.gradient
-		fmt.Println("MULTIPLICATION")
 	}
 	v.operation = "multiplication"
 	return &output
@@ -69,7 +70,6 @@ func (v *Value) add(input *Value) *Value {
 	output.backward = func() {
 		v.gradient += 1.0 * output.gradient
 		input.gradient += 1.0 * output.gradient
-		fmt.Println(v.gradient, "ADDITION Gradient")
 	}
 	v.operation = "addition"
 	return &output
@@ -81,8 +81,6 @@ func (v *Value) tanh() *Value {
 	output := Value{value: t, children: []*Value{v}}
 	output.backward = func() {
 		v.gradient += (1 - (t * t)) * output.gradient
-		fmt.Println(v.gradient, "TANH GRAD")
-		fmt.Println("TANH")
 	}
 	v.operation = "activation"
 	return &output
