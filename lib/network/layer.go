@@ -8,25 +8,25 @@ type Layer struct {
 	derivatives [][]float64
 }
 
-func (l *Layer) initLayer() {
+func (l *Layer) initLayer(nNeurons int, nWeights int) {
 	// For the shape of input generate a neuron
-	// Each Neuron initializes with random weight
-	// and biase defined in generateBias
-	nNeurons := 4
+	// Each Neuron initializes with random weights
+	// and bias defined in generateBias
 	neurons := make([]Neuron, nNeurons)
+	l.output = make([]float64, nNeurons)
 	for i := 0; i < nNeurons; i++ {
 		neuron := Neuron{}
-		neuron.initNeuron()
+		neuron.initNeuron(nWeights)
 		neurons[i] = neuron
 	}
 	l.neurons = neurons
-	l.output = make([]float64, nNeurons)
-	l.derivatives = make([][]float64, nNeurons)
 }
 
 func (l *Layer) feedForward(layerInput []float64) {
 	for i := 0; i < len(l.neurons); i++ {
+
 		l.neurons[i].calculateOutput(layerInput)
+		l.output[i] = l.neurons[i].activation
 	}
 
 }
@@ -35,17 +35,7 @@ func (l *Layer) outputFunc() {
 	output := make([]float64, len(l.neurons))
 	for i := 0; i < len(l.neurons); i++ {
 		output[i] = average(l.neurons[i].output)
+
 	}
 	l.output = output
-}
-
-func (l *Layer) backpropagate(loss float64) {
-	for i := 0; i < len(l.neurons); i++ {
-		l.neurons[i].weight = l.neurons[i].weight * loss
-		l.neurons[i].bias = l.neurons[i].bias * loss
-	}
-}
-
-func loss(x float64) float64 {
-
 }

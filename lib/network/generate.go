@@ -13,6 +13,8 @@ func generateLinearData(nInputs int) ([]Input, []Input) {
 		data[i] = Input{x: []float64{x}, y: []float64{y}}
 	}
 
+	data = normalizeData(data)
+
 	trainSize := int(math.Floor(float64(nInputs) * 0.8))
 	for i := 0; i < nInputs*10; i++ {
 		randomIndex := rand.Intn(nInputs - 1)
