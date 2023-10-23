@@ -2,9 +2,10 @@ package network
 
 type Layer struct {
 	//	activationFunction func()
-	neurons []Neuron
-	output  []float64
-	losses  []float64
+	neurons     []Neuron
+	output      []float64
+	losses      []float64
+	derivatives [][]float64
 }
 
 func (l *Layer) initLayer() {
@@ -20,6 +21,7 @@ func (l *Layer) initLayer() {
 	}
 	l.neurons = neurons
 	l.output = make([]float64, nNeurons)
+	l.derivatives = make([][]float64, nNeurons)
 }
 
 func (l *Layer) feedForward(layerInput []float64) {
@@ -42,4 +44,8 @@ func (l *Layer) backpropagate(loss float64) {
 		l.neurons[i].weight = l.neurons[i].weight * loss
 		l.neurons[i].bias = l.neurons[i].bias * loss
 	}
+}
+
+func loss(x float64) float64 {
+
 }

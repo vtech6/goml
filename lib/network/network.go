@@ -27,7 +27,7 @@ func Run() {
 	//		{x: []float64{1, 0}, y: []float64{1}},
 	//		{x: []float64{1, 1}, y: []float64{0}}}
 	network := initNetwork()
-	trainSet, _ := generateLinearData(100)
+	trainSet := generateInput(100)
 
 	network.trainNetwork(trainSet)
 	network.networkPredict([]float64{1.3, 1.2, 1.3, 2, 2.5, 8, 2.3})
@@ -59,7 +59,7 @@ func (n *Network) trainNetwork(networkInput []Input) {
 		n.networkBackpropagate()
 	}
 	for i := 0; i < len(networkInput); i++ {
-		fmt.Println("Target: ", networkInput[i].y, ", Prediction: ", n.output[i])
+		fmt.Println("Source: ", networkInput[i].x, ", Target: ", networkInput[i].y, ", Prediction: ", n.output[i])
 	}
 }
 
@@ -119,7 +119,9 @@ func (n *Network) networkValidate() {
 
 func (n *Network) networkBackpropagate() {
 	for i := 0; i < len(n.layers); i++ {
-		n.layers[i].backpropagate(1 - (n.loss * n.learningRate))
+		activations := n.layers[i].output
+		delta = 1
+		n.layers[i-1].backpropagate(1 - (n.loss * n.learningRate))
 	}
 }
 

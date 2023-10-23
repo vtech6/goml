@@ -27,7 +27,7 @@ func generateLinearData(nInputs int) ([]Input, []Input) {
 func generateInput(nInputs int) []Input {
 	generatedInput := make([]Input, nInputs)
 	for i := 0; i < nInputs; i++ {
-		generatedInput[i] = Input{x: []float64{randomFloatStd()*2 + 3}, y: []float64{randomFloatStd()*5 + 2}}
+		generatedInput[i] = Input{x: []float64{rand.Float64()*5 + 3}, y: []float64{rand.Float64()*5 + 2}}
 	}
 	return generatedInput
 }

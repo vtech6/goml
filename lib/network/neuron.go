@@ -4,6 +4,7 @@ type Neuron struct {
 	weight float64
 	bias   float64
 	output []float64
+	delta  float64
 }
 
 func (n *Neuron) initNeuron() {
