@@ -8,7 +8,7 @@ type Layer struct {
 	derivatives [][]float64
 }
 
-func (l *Layer) initLayer(nNeurons int, nWeights int) {
+func (l *Layer) initLayer(nInputs int, nNeurons int) {
 	// For the shape of input generate a neuron
 	// Each Neuron initializes with random weights
 	// and bias defined in generateBias
@@ -16,7 +16,7 @@ func (l *Layer) initLayer(nNeurons int, nWeights int) {
 	l.output = make([]*Value, nNeurons)
 	for i := 0; i < nNeurons; i++ {
 		neuron := Neuron{}
-		neuron.initNeuron(nWeights)
+		neuron.initNeuron(nInputs)
 		neurons[i] = neuron
 	}
 	l.neurons = neurons
@@ -24,11 +24,17 @@ func (l *Layer) initLayer(nNeurons int, nWeights int) {
 
 func (l *Layer) feedForward(layerInput []float64) {
 	for i := 0; i < len(l.neurons); i++ {
-
 		l.neurons[i].calculateOutput(layerInput)
 		l.output[i] = l.neurons[i].activation
 	}
 
 }
 
-func (l *Layer) outputFunc() {}
+type MLP struct {
+	layers []*Layer
+}
+
+func (m *MLP) initNetwork(nInputs int, nOutputs []int) {
+
+	//TODO: implement MLP
+}

@@ -29,10 +29,10 @@ func Run() {
 }
 
 func testFunc() {
-	neuron := Neuron{}
-	neuron.initNeuron(2)
-	neuron.calculateOutput([]float64{0.5, 0.8})
-	fmt.Println(neuron.activation)
+	neuron := Layer{}
+	neuron.initLayer(3, 2)
+	neuron.feedForward([]float64{0.5, 0.8})
+	fmt.Println(neuron.output[0].value, neuron.output[1].value, neuron.output[2].value)
 }
 
 func initNetwork() Network {
@@ -87,7 +87,6 @@ func (n *Network) networkFeedForward(networkInput []Input) {
 
 				//Else process the output of the previous layer
 			}
-			n.layers[layerIndex].outputFunc()
 		}
 
 	}

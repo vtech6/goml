@@ -12,7 +12,6 @@ func (n *Network) networkPredict(networkInputX []float64) {
 			} else {
 				//Else process the output of the previous layer
 			}
-			n.layers[layerIndex].outputFunc()
 		}
 		fmt.Println("Source: ", networkInputX[i], ", Prediction: ", predictions[i])
 	}
