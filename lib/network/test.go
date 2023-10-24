@@ -52,38 +52,3 @@ func layerTest() {
 	loss.calculateGradients()
 	fmt.Println(loss.gradient, loss.children[0].gradient, layer2.neurons[0].activation.gradient, layer.neurons[0].activation.gradient)
 }
-
-func networkTest() {
-	inputs := [][]float64{{2.0, 3.0, -1.0}, {3.0, -1.0, 0.5}, {0.5, 1.0, 1.0}, {1.0, 1.0, -1.0}}
-	targets := []float64{1.0, -1.0, -1.0, 1.0}
-	network := MLP{}
-	network.initNetwork([]int{3, 4, 4, 1})
-	for step := 0; step < 20; step++ {
-		loss := Value{value: 0.0}
-		predictions := make([]*Value, len(inputs))
-		//
-		for i := 0; i < len(predictions); i++ {
-			output := network.calculateOutput(inputs[i])[0]
-			predictions[i] = output
-		}
-		for i := 0; i < len(predictions); i++ {
-			negativePred := predictions[i].negative()
-			targetValue := Value{value: targets[i]}
-			loss = *loss.add(targetValue.add(negativePred))
-		}
-		parameters := network.parameters()
-		loss.gradient = 1.0
-		loss.backward()
-		loss.calculateGradients()
-		for layerIndex := 0; layerIndex < len(parameters); layerIndex++ {
-			for valueIndex := 0; valueIndex < len(parameters[layerIndex]); valueIndex++ {
-				for valueIndex2 := 0; valueIndex2 < len(parameters[layerIndex][valueIndex]); valueIndex2++ {
-					value := parameters[layerIndex][valueIndex][valueIndex2]
-					value.value += loss.value * value.gradient
-				}
-			}
-		}
-		fmt.Println(network.layers[0].neurons[0].activation.gradient)
-	}
-
-}

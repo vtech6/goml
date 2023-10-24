@@ -1,7 +1,6 @@
 package network
 
 import (
-	"fmt"
 	"math"
 )
 
@@ -71,7 +70,6 @@ func (v *Value) tanh() *Value {
 	output := Value{value: t, children: []*Value{v}}
 	output.backward = func() {
 		v.gradient += (1 - (t * t)) * output.gradient
-		fmt.Println("TANH", v.gradient)
 	}
 	v.operation = "activation"
 	return &output
@@ -88,7 +86,6 @@ func (v *Value) calculateGradients() {
 	for nodeIndex := 0; nodeIndex < len(topo); nodeIndex++ {
 		if topo[nodeIndex].backward != nil {
 			topo[nodeIndex].backward()
-			fmt.Println(topo[nodeIndex].gradient)
 		}
 	}
 }

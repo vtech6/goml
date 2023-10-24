@@ -41,13 +41,13 @@ func (n *Neuron) calculateOutputDeep(neuronInput []*Value) {
 	n.activation = &activation
 }
 
-func (n *Neuron) parameters() *[]*Value {
+func (n *Neuron) parameters() []*Value {
 	params := make([]*Value, len(n.weights)+1)
 	for i := 0; i < len(n.weights); i++ {
 		params[i] = n.weights[i]
 	}
 	params[len(n.weights)] = n.bias
-	return &params
+	return params
 }
 
 func buildTopo(v *Value, topo *[]*Value) {

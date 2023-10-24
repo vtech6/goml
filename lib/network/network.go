@@ -1,6 +1,9 @@
 package network
 
-import "fmt"
+import (
+	"fmt"
+	"math/rand"
+)
 
 type Input struct {
 	x []float64
@@ -35,7 +38,6 @@ func (m *MLP) initNetwork(shape []int) {
 		newLayer := layer.initLayer(shape[i-1], shape[i])
 		m.layers[i-1] = newLayer
 	}
-	fmt.Println(m)
 }
 
 //We iterate through each layer and feed forward the data. What that means, is
@@ -52,18 +54,56 @@ func (m *MLP) calculateOutput(networkInput []float64) []*Value {
 			m.layers[i].feedForwardDeep(m.layers[i-1].output)
 		}
 	}
-	fmt.Println(m.layers[len(m.layers)-2])
 	return m.layers[len(m.layers)-2].output
 }
 
-//The following function allows us to gather all the parameters of our nodes
-//so that we can multiply their values by their corresponding gradients.
+func RunNetwork() {
+	inputs := [][]float64{{2.0, 3.0, -1.0}, {3.0, -1.0, 0.5}, {0.5, 1.0, 1.0}, {1.0, 1.0, -1.0}}
+	targets := []float64{1.0, -1.0, -1.0, 1.0}
+	network := MLP{}
+	network.initNetwork([]int{3, 4, 4, 1})
+	//For step in steps
+	for step := 0; step < 10; step++ {
+		var value Value
+		loss := value.init(0.0)
+		outputs := make([]*Value, len(inputs))
+		//For input of inputs
+		for inputIndex := 0; inputIndex < len(inputs); inputIndex++ {
+			//Calculate output and add its value to outputs
+			output := network.calculateOutput(inputs[inputIndex])
+			outputs[inputIndex] = output[0]
+		}
 
-func (m *MLP) parameters() [][][]*Value {
-	parameters := make([][][]*Value, len(m.layers)-1)
-	for i := 0; i < len(m.layers)-1; i++ {
-		parameters[i] = *m.layers[i].parameters()
+		for outputIndex := 0; outputIndex < len(outputs); outputIndex++ {
+			targetValue := value.init(targets[outputIndex])
+			negativeOutput := outputs[outputIndex].negative()
+			yDifference := negativeOutput.add(targetValue)
+			loss = loss.add(yDifference.tanh())
+			fmt.Println("Prediction", outputIndex, " ", outputs[outputIndex].value)
 
+		}
+
+		loss.gradient = 1.0
+		loss.backward()
+		loss.calculateGradients()
+		for layerIndex := 0; layerIndex < len(network.layers)-1; layerIndex++ {
+			layer := network.layers[layerIndex]
+			for neuronIndex := 0; neuronIndex < len(layer.neurons); neuronIndex++ {
+				neuron := layer.neurons[neuronIndex]
+				for valueIndex := 0; valueIndex < len(neuron.weights); valueIndex++ {
+					//Replace line below with gradient
+					weight := neuron.weights[valueIndex].value * rand.Float64()
+					weight += neuron.weights[valueIndex].value
+					neuron.weights[valueIndex].value = weight
+				}
+
+				neuron.bias.value += neuron.bias.value * neuron.bias.gradient
+			}
+		}
+		fmt.Println("---------")
+		fmt.Println("Step", step, ", Loss:", loss.value)
+		fmt.Println("---------")
 	}
-	return parameters
+	output := network.calculateOutput([]float64{2.5, 2.5, -0.5})
+	fmt.Println("VALIDATION: ", output[0].value)
 }
