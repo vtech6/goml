@@ -24,12 +24,18 @@ func (l *Layer) initLayer(nInputs int, nNeurons int) *Layer {
 	return &layer
 }
 
+//We pass the layer input of shape []float64 to our neurons if it's the first
+//hidden layer
+
 func (l *Layer) feedForward(layerInput []float64) {
 	for i := 0; i < len(l.neurons); i++ {
 		l.neurons[i].calculateOutput(layerInput)
 		l.output[i] = l.neurons[i].activation
 	}
 }
+
+//For hidden layers, the input is the output of the previous layer, which means
+//we should accept an array of Values.
 
 func (l *Layer) feedForwardDeep(layerInput []*Value) {
 	for i := 0; i < len(l.neurons); i++ {

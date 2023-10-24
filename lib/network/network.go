@@ -10,28 +10,27 @@ type Input struct {
 	y []float64
 }
 
-type Network struct {
-	epochs        int
-	batchSize     int
-	layers        []Layer
-	loss          float64
-	learningRate  float64
-	nHiddenLayers int
-	output        []float64
-}
-
 //MLP stands for Multilayer Perceptron which is the model that we will be
 //creating and using. It consists of n-Inputs, m-Hidden-Layers and an Output.
 
 type MLP struct {
 	layers []*Layer
+	steps  int
+}
+
+type NetworkParams struct {
+	trainX       [][]float64
+	trainY       []float64
+	shape        []int
+	learningRate float64
+	steps        int
 }
 
 //To initialize MLP we pass it a shape. This is an array that describes how
 //many layers of how many neurons will be in our model.
 //For example shape [2,3,1] would mean 2 inputs, 3 hidden layers and an output.
 
-func (m *MLP) initNetwork(shape []int) {
+func (m *MLP) initNetwork(shape []int, learningRate float64, steps int) {
 	var layer Layer
 	m.layers = make([]*Layer, len(shape))
 	for i := 1; i < len(shape); i++ {
@@ -57,13 +56,26 @@ func (m *MLP) calculateOutput(networkInput []float64) []*Value {
 	return m.layers[len(m.layers)-2].output
 }
 
-func RunNetwork() {
-	inputs := [][]float64{{2.0, 3.0, -1.0}, {3.0, -1.0, 0.5}, {0.5, 1.0, 1.0}, {1.0, 1.0, -1.0}}
-	targets := []float64{1.0, -1.0, -1.0, 1.0}
+func runNetwork(params NetworkParams) {
+	inputs := params.trainX
+	targets := params.trainY
+	shape := params.shape
+	steps := params.steps
+	learningRate := params.learningRate
 	network := MLP{}
-	network.initNetwork([]int{3, 4, 4, 1})
-	//For step in steps
-	for step := 0; step < 10; step++ {
+	network.initNetwork(shape, learningRate, steps)
+	//For step in steps we repeat the following process:
+	//1. Feed forward the data
+	//2. Calculate the output
+	//3. Calculate target - predicted output difference
+	//4. Calculate and accumulate loss for each prediction
+	//5. Calculate gradient for each element of our network
+	//6. Move the variable in the opposite direction of its gradient to
+	//   decrease loss
+
+	//Missing: batches, epochs and the gradient calculation for weights is still
+	//buggy.
+	for step := 0; step < steps; step++ {
 		var value Value
 		loss := value.init(0.0)
 		outputs := make([]*Value, len(inputs))
@@ -74,18 +86,24 @@ func RunNetwork() {
 			outputs[inputIndex] = output[0]
 		}
 
+		//Calculate loss for each x from the training set and add it to
+		//the previously accumulated loss.
+
 		for outputIndex := 0; outputIndex < len(outputs); outputIndex++ {
 			targetValue := value.init(targets[outputIndex])
 			negativeOutput := outputs[outputIndex].negative()
 			yDifference := negativeOutput.add(targetValue)
 			loss = loss.add(yDifference.tanh())
 			fmt.Println("Prediction", outputIndex, " ", outputs[outputIndex].value)
-
 		}
+
+		//Gradient at the end is always 1.0
 
 		loss.gradient = 1.0
 		loss.backward()
 		loss.calculateGradients()
+
+		//Parse our network and adjust each variable by gradient
 		for layerIndex := 0; layerIndex < len(network.layers)-1; layerIndex++ {
 			layer := network.layers[layerIndex]
 			for neuronIndex := 0; neuronIndex < len(layer.neurons); neuronIndex++ {
@@ -96,14 +114,21 @@ func RunNetwork() {
 					weight += neuron.weights[valueIndex].value
 					neuron.weights[valueIndex].value = weight
 				}
-
-				neuron.bias.value += neuron.bias.value * neuron.bias.gradient
+				neuron.bias.value += neuron.bias.value * neuron.bias.gradient * learningRate
 			}
 		}
 		fmt.Println("---------")
 		fmt.Println("Step", step, ", Loss:", loss.value)
 		fmt.Println("---------")
 	}
-	output := network.calculateOutput([]float64{2.5, 2.5, -0.5})
-	fmt.Println("VALIDATION: ", output[0].value)
+	//Below we test if the network can generalize on a data sample. This should
+	//be expanded to accept testX and testY, then produce the accuracy of our
+	//network. For now we have this minimalistic test.
+	val1 := network.calculateOutput([]float64{2.5, 2.5, -0.1})
+	fmt.Println("Expected output: ~(-1)")
+	fmt.Println("VALIDATION: ", val1[0].value)
+
+	val2 := network.calculateOutput([]float64{-3, 0, -0.01})
+	fmt.Println("Expected output: ~(1)")
+	fmt.Println("VALIDATION: ", val2[0].value)
 }

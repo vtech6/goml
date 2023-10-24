@@ -3,10 +3,11 @@ package network
 type Neuron struct {
 	weights    []*Value
 	bias       *Value
-	output     []float64
-	delta      float64
 	activation *Value
 }
+
+//We initialize each neuron with random weights in shape of the input and a
+//random bias.
 
 func (n *Neuron) initNeuron(inputLength int) {
 	var value Value
@@ -15,8 +16,10 @@ func (n *Neuron) initNeuron(inputLength int) {
 		n.weights[i] = value.init(randomFloatStd())
 	}
 	n.bias = value.init(randomFloatStd())
-	n.output = make([]float64, inputLength)
 }
+
+//Multiply each element of the input data with its corresponding weight in the
+//neuron. Add bias. Apply activation function.
 
 func (n *Neuron) calculateOutput(neuronInput []float64) {
 	var value Value
@@ -29,6 +32,9 @@ func (n *Neuron) calculateOutput(neuronInput []float64) {
 	}
 	n.activation = &activation
 }
+
+//Deep neurons have an input of type Value, because they are fed the output of
+//the previous layer of neurons.
 
 func (n *Neuron) calculateOutputDeep(neuronInput []*Value) {
 	var activation Value
@@ -49,6 +55,8 @@ func (n *Neuron) parameters() []*Value {
 	params[len(n.weights)] = n.bias
 	return params
 }
+
+//The function below builds the tree of variables belonging to this output.
 
 func buildTopo(v *Value, topo *[]*Value) {
 	_topo := *topo

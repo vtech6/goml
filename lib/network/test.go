@@ -2,6 +2,11 @@ package network
 
 import "fmt"
 
+//The following functions help me verify integrity of the code. Diagnosing bugs
+//becomes less of a hassle when I can run subcomponents of the network separately.
+
+//Calculate gradient after a chain of arithmetic operations.
+
 func valueTest() {
 	var value Value
 	a := value.init(2)
@@ -13,14 +18,15 @@ func valueTest() {
 	cd := c.multiply(d)
 	abcd := ab.add(cd)
 	output := abcd.add(bias)
-	aoutput := output.tanh()
-	aoutput.gradient = 1.0
-	aoutput.backward()
-	aoutput.calculateGradients()
-	fmt.Println(aoutput.value)
-	fmt.Println(aoutput.gradient, output.gradient, bias.gradient, abcd.gradient, d.gradient, c.gradient, b.gradient, a.gradient)
-
+	activeOutput := output.tanh()
+	activeOutput.gradient = 1.0
+	activeOutput.backward()
+	activeOutput.calculateGradients()
+	fmt.Println(activeOutput.value)
+	fmt.Println(activeOutput.gradient, output.gradient, bias.gradient, abcd.gradient, d.gradient, c.gradient, b.gradient, a.gradient)
 }
+
+//Calculate gradient after a chain of operations on neurons.
 
 func neuronTest() {
 	a := Neuron{}
@@ -32,6 +38,8 @@ func neuronTest() {
 	output.calculateGradients()
 	fmt.Println(output.gradient, output.children[0].gradient, output.children[0].children[1].gradient)
 }
+
+//Calculate gradient after a chain of layer operations.
 
 func layerTest() {
 	var _layer Layer

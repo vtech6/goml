@@ -55,13 +55,16 @@ func (v *Value) multiply(input *Value) *Value {
 	return &output
 }
 
+//When we need to subtract a variable, we can perform an addition of its negative
+//value.
+
 func (v *Value) negative() *Value {
 	tempValue := *v
 	tempValue.value = -v.value
 	return &tempValue
 }
 
-//Tanh is an activation function, so it does not require any other input but
+//Tanh is an activation function, so it does not require any other input than
 //the Value itself. It returns a new Value that wraps the original.
 
 func (v *Value) tanh() *Value {
