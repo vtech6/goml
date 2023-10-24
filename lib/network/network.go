@@ -17,61 +17,53 @@ type Network struct {
 	output        []float64
 }
 
-func Run() {
+//MLP stands for Multilayer Perceptron which is the model that we will be
+//creating and using. It consists of n-Inputs, m-Hidden-Layers and an Output.
 
-	testFunc()
+type MLP struct {
+	layers []*Layer
 }
 
-func testFunc() {
-	inputs := [][]float64{{2.0, 3.0, -1.0}, {3.0, -1.0, 0.5}, {0.5, 1.0, 1.0}, {1.0, 1.0, -1.0}}
-	targets := []float64{1.0, -1.0, -1.0, 1.0}
-	network := MLP{}
-	network.initNetwork([]int{3, 4, 4, 1})
+//To initialize MLP we pass it a shape. This is an array that describes how
+//many layers of how many neurons will be in our model.
+//For example shape [2,3,1] would mean 2 inputs, 3 hidden layers and an output.
 
-	for k := 0; k < 20; k++ {
-		loss := Value{value: 0.0}
-		predictions := make([]*Value, len(inputs))
-		for i := 0; i < len(predictions); i++ {
-			output := network.calculateOutput(inputs[i])[0]
-			fmt.Println(output, "OUTPUT")
-			predictions[i] = output
-		}
-		for i := 0; i < len(predictions); i++ {
-			negativePred := predictions[i].negative()
-			targetValue := Value{value: targets[i]}
-			loss = *loss.add(targetValue.add(&negativePred))
-		}
-
-		fmt.Println("PREDICTION 1", predictions[0].value)
-		fmt.Println(loss, "LOSS")
+func (m *MLP) initNetwork(shape []int) {
+	var layer Layer
+	m.layers = make([]*Layer, len(shape))
+	for i := 1; i < len(shape); i++ {
+		newLayer := layer.initLayer(shape[i-1], shape[i])
+		m.layers[i-1] = newLayer
 	}
-	network.calculateOutput([]float64{0.5, 0.8})
+	fmt.Println(m)
 }
 
-func initNetwork() Network {
-	var network Network
-	network.setupNetwork(0.001, 2)
-	return network
-}
+//We iterate through each layer and feed forward the data. What that means, is
+//each layer passes the x-input to each of its neurons and multiplies its value
+//by corresponding weights. For example - in a network of shape [2,3,1], an
+//input [x1, x2] would be multiplied by weights [w1, w2] of 3 neurons of the
+//hidden layer and return one output Y.
 
-func (n *Network) setupNetwork(learningRate float64, nHiddenLayers int) {
-	n.epochs = 1
-	n.learningRate = learningRate
-	n.nHiddenLayers = nHiddenLayers
-}
-
-func (n *Network) networkFeedForward(networkInput []Input) {
+func (m *MLP) calculateOutput(networkInput []float64) []*Value {
 	for i := 0; i < len(networkInput); i++ {
-		for layerIndex := 0; layerIndex < len(n.layers); layerIndex++ {
-			if layerIndex == 0 {
-
-				//If layer is first after input, process the input
-				n.layers[layerIndex].feedForward(networkInput[i].x)
-			} else {
-
-				//Else process the output of the previous layer
-			}
+		if i == 0 {
+			m.layers[i].feedForward(networkInput)
+		} else {
+			m.layers[i].feedForwardDeep(m.layers[i-1].output)
 		}
+	}
+	fmt.Println(m.layers[len(m.layers)-2])
+	return m.layers[len(m.layers)-2].output
+}
+
+//The following function allows us to gather all the parameters of our nodes
+//so that we can multiply their values by their corresponding gradients.
+
+func (m *MLP) parameters() [][][]*Value {
+	parameters := make([][][]*Value, len(m.layers)-1)
+	for i := 0; i < len(m.layers)-1; i++ {
+		parameters[i] = *m.layers[i].parameters()
 
 	}
+	return parameters
 }

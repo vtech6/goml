@@ -1,10 +1,5 @@
 package network
 
-import (
-	"fmt"
-	"math"
-)
-
 type Neuron struct {
 	weights    []*Value
 	bias       *Value
@@ -25,108 +20,50 @@ func (n *Neuron) initNeuron(inputLength int) {
 
 func (n *Neuron) calculateOutput(neuronInput []float64) {
 	var value Value
-	activation := value.init(0.0)
+	var activation Value
 	for i := 0; i < len(neuronInput); i++ {
-
 		output := n.weights[i].multiply(value.init(neuronInput[i]))
 		output = output.add(n.bias)
-		activation = activation.add(output)
+		activation = *output.tanh()
 
 	}
-	n.activation = activation
+	n.activation = &activation
 }
 
 func (n *Neuron) calculateOutputDeep(neuronInput []*Value) {
-	var value Value
-	activation := value.init(0.0)
+	var activation Value
 	for i := 0; i < len(neuronInput); i++ {
 
 		output := n.weights[i].multiply(neuronInput[i])
 		output = output.add(n.bias)
-		activation = activation.add(output)
+		activation = *output.tanh()
 	}
-	n.activation = activation
+	n.activation = &activation
 }
 
-func (n *Neuron) parameters() []*Value {
+func (n *Neuron) parameters() *[]*Value {
 	params := make([]*Value, len(n.weights)+1)
 	for i := 0; i < len(n.weights); i++ {
 		params[i] = n.weights[i]
 	}
 	params[len(n.weights)] = n.bias
-	return params
-}
-
-type Value struct {
-	value     float64
-	gradient  float64
-	backward  func()
-	operation string
-	children  []*Value
-}
-
-func (v *Value) init(value float64) *Value {
-	newValue := Value{value: value}
-	newValue.operation = "INIT"
-	newValue.gradient = 0.0
-	newValue.backward = func() {
-	}
-	return &newValue
-
-}
-
-func (v *Value) multiply(input *Value) *Value {
-	output := Value{value: v.value * input.value, children: []*Value{v, input}}
-	output.backward = func() {
-		v.gradient += input.value * output.gradient
-		input.gradient += v.value * output.gradient
-	}
-	v.operation = "multiplication"
-	return &output
-}
-
-func (v *Value) add(input *Value) *Value {
-	output := Value{value: v.value + input.value, children: []*Value{v, input}}
-	output.backward = func() {
-		v.gradient += 1.0 * output.gradient
-		input.gradient += 1.0 * output.gradient
-	}
-	v.operation = "addition"
-	return &output
-}
-
-func (v *Value) negative() Value {
-	tempValue := *v
-	tempValue.value = -v.value
-	return tempValue
-}
-
-func (v *Value) tanh() *Value {
-	x := v.value
-	t := (math.Exp(2*x) - 1) / (math.Exp(2*x) + 1)
-	output := Value{value: t, children: []*Value{v}}
-	output.backward = func() {
-		v.gradient += (1 - (t * t)) * output.gradient
-	}
-	v.operation = "activation"
-	return &output
-}
-
-func (v *Value) calculateGradients() {
-	topo := []*Value{}
-	buildTopo(v, &topo)
-	fmt.Println(topo)
-	v.gradient = 1.0
-	for nodeIndex := 0; nodeIndex < len(topo); nodeIndex++ {
-		topo[nodeIndex].backward()
-		fmt.Println(topo[nodeIndex])
-	}
-
+	return &params
 }
 
 func buildTopo(v *Value, topo *[]*Value) {
+	_topo := *topo
+	presentInTopo := false
+	for i := 0; i < len(_topo); i++ {
+		for j := 0; j < len(v.children); j++ {
+			if _topo[i] == v.children[j] {
+				presentInTopo = true
+			}
+		}
+	}
 	for i := 0; i < len(v.children); i++ {
-		*topo = append(*topo, v.children[i])
-		buildTopo(v.children[i], topo)
+		if presentInTopo == false {
+			*topo = append(*topo, v.children[i])
+			buildTopo(v.children[i], topo)
+		}
 	}
 }
