@@ -12,14 +12,14 @@ To make sure I do understand the issue at hand, I decided to forgo any external 
 - No external libraries or modules
 - For simplicity, I limit the input shape to (1,x)
 
-<b>Goals: </b>
+<b>Goal: </b>
 - Multilayer Perceptron
-- Dense Neural Network
 </body>
 
 <b>Current status:</b>
 - Define basic data types (Input, Neuron, Layer)
 - Calculate neuron outputs [type: (1,x) array of weight*input+bias]
 - Define gradient methods and neural structure (heavily inspired by Karpathy's video)
+- Backpropagate and train for k steps
   
   
