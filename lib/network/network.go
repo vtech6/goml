@@ -19,20 +19,33 @@ type Network struct {
 
 func Run() {
 
-	network := initNetwork()
-	trainSet := generateInput(2)
-
-	network.trainNetwork(normalizeData(trainSet))
-	network.networkPredict([]float64{0.5, 0.1, 0.5, 0.8, 0.9, trainSet[0].x[0]})
-
 	testFunc()
 }
 
 func testFunc() {
-	neuron := Layer{}
-	neuron.initLayer(3, 2)
-	neuron.feedForward([]float64{0.5, 0.8})
-	fmt.Println(neuron.output[0].value, neuron.output[1].value, neuron.output[2].value)
+	inputs := [][]float64{{2.0, 3.0, -1.0}, {3.0, -1.0, 0.5}, {0.5, 1.0, 1.0}, {1.0, 1.0, -1.0}}
+	targets := []float64{1.0, -1.0, -1.0, 1.0}
+	network := MLP{}
+	network.initNetwork([]int{3, 4, 4, 1})
+
+	for k := 0; k < 20; k++ {
+		loss := Value{value: 0.0}
+		predictions := make([]*Value, len(inputs))
+		for i := 0; i < len(predictions); i++ {
+			output := network.calculateOutput(inputs[i])[0]
+			fmt.Println(output, "OUTPUT")
+			predictions[i] = output
+		}
+		for i := 0; i < len(predictions); i++ {
+			negativePred := predictions[i].negative()
+			targetValue := Value{value: targets[i]}
+			loss = *loss.add(targetValue.add(&negativePred))
+		}
+
+		fmt.Println("PREDICTION 1", predictions[0].value)
+		fmt.Println(loss, "LOSS")
+	}
+	network.calculateOutput([]float64{0.5, 0.8})
 }
 
 func initNetwork() Network {
@@ -45,35 +58,6 @@ func (n *Network) setupNetwork(learningRate float64, nHiddenLayers int) {
 	n.epochs = 1
 	n.learningRate = learningRate
 	n.nHiddenLayers = nHiddenLayers
-}
-
-func (n *Network) initLayers(nHiddenLayers int) {
-	layers := make([]Layer, nHiddenLayers)
-	for i := 0; i < nHiddenLayers; i++ {
-		layer := Layer{neurons: []Neuron{}}
-		if i == 0 {
-			layer.initLayer(1, 2)
-		} else {
-			layer.initLayer(2, 2)
-		}
-		layers[i] = layer
-	}
-	n.layers = layers
-}
-
-func (n *Network) trainNetwork(networkInput []Input) {
-	n.output = make([]float64, len(networkInput))
-	n.initLayers(n.nHiddenLayers)
-	for i := 0; i < n.epochs; i++ {
-		n.networkFeedForward(networkInput)
-		n.networkValidate()
-		if i < n.epochs-1 {
-			n.networkBackpropagate(networkInput)
-		}
-	}
-	//	for i := 0; i < len(networkInput); i++ {
-	//		fmt.Println("Source: ", networkInput[i].x, ", Target: ", networkInput[i].y, ", Prediction: ", n.output[i])
-	//	}
 }
 
 func (n *Network) networkFeedForward(networkInput []Input) {

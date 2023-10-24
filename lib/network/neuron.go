@@ -34,7 +34,27 @@ func (n *Neuron) calculateOutput(neuronInput []float64) {
 
 	}
 	n.activation = activation
+}
 
+func (n *Neuron) calculateOutputDeep(neuronInput []*Value) {
+	var value Value
+	activation := value.init(0.0)
+	for i := 0; i < len(neuronInput); i++ {
+
+		output := n.weights[i].multiply(neuronInput[i])
+		output = output.add(n.bias)
+		activation = activation.add(output)
+	}
+	n.activation = activation
+}
+
+func (n *Neuron) parameters() []*Value {
+	params := make([]*Value, len(n.weights)+1)
+	for i := 0; i < len(n.weights); i++ {
+		params[i] = n.weights[i]
+	}
+	params[len(n.weights)] = n.bias
+	return params
 }
 
 type Value struct {
@@ -73,6 +93,12 @@ func (v *Value) add(input *Value) *Value {
 	}
 	v.operation = "addition"
 	return &output
+}
+
+func (v *Value) negative() Value {
+	tempValue := *v
+	tempValue.value = -v.value
+	return tempValue
 }
 
 func (v *Value) tanh() *Value {
