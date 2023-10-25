@@ -55,19 +55,6 @@ func (v *Value) multiply(input *Value) *Value {
 	return &output
 }
 
-//When we need to subtract a variable, we can perform an addition of its negative
-//value.
-
-func (v *Value) negative() *Value {
-	x := v.value
-	output := Value{value: -x, children: []*Value{v}}
-	output.backward = func() {
-		v.gradient += 1 * output.gradient
-	}
-	v.operation = "NEGATIVE"
-	return &output
-}
-
 //Tanh is an activation function, so it does not require any other input than
 //the Value itself. It returns a new Value that wraps the original.
 

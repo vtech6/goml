@@ -14,7 +14,6 @@ type Input struct {
 
 type MLP struct {
 	layers []*Layer
-	steps  int
 }
 
 type NetworkParams struct {
@@ -86,8 +85,8 @@ func runNetwork(params NetworkParams) {
 	//6. Move the variable in the opposite direction of its gradient to
 	//   decrease loss
 
-	//Missing: batches, epochs and the gradient calculation for weights is still
-	//buggy.
+	//Missing: batches, epochs
+
 	for step := 0; step < steps; step++ {
 
 		var value Value

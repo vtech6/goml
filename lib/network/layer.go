@@ -1,11 +1,8 @@
 package network
 
 type Layer struct {
-	//	activationFunction func()
-	neurons     []*Neuron
-	output      []*Value
-	losses      []float64
-	derivatives [][]float64
+	neurons []*Neuron
+	output  []*Value
 }
 
 func (l *Layer) initLayer(nInputs int, nNeurons int) *Layer {

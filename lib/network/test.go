@@ -72,6 +72,7 @@ func layerTest() {
 	loss.calculateGradients()
 	fmt.Println(loss.gradient, loss.children[0].gradient, layer2.neurons[0].activation.gradient, layer.neurons[0].activation.gradient)
 }
+
 func layerTest2() {
 	inputs := [][]float64{
 		{2.0, 3.0, -1.0},

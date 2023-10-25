@@ -1,10 +1,6 @@
 package network
 
 func Run() {
-	rrunNetwork()
-}
-
-func rrunNetwork() {
 
 	inputs := [][]float64{
 		{2.0, 3.0, -1.0},
