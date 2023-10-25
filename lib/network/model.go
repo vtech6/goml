@@ -59,9 +59,13 @@ func (v *Value) multiply(input *Value) *Value {
 //value.
 
 func (v *Value) negative() *Value {
-	tempValue := *v
-	tempValue.value = -v.value
-	return &tempValue
+	x := v.value
+	output := Value{value: -x, children: []*Value{v}}
+	output.backward = func() {
+		v.gradient += 1 * output.gradient
+	}
+	v.operation = "NEGATIVE"
+	return &output
 }
 
 //Tanh is an activation function, so it does not require any other input than
@@ -75,6 +79,15 @@ func (v *Value) tanh() *Value {
 		v.gradient += (1 - (t * t)) * output.gradient
 	}
 	v.operation = "activation"
+	return &output
+}
+
+func (v *Value) square() *Value {
+	output := Value{value: v.value * v.value, children: []*Value{v}}
+	output.backward = func() {
+		v.gradient += 2 * (v.value) * output.gradient
+	}
+	v.operation = "square"
 	return &output
 }
 

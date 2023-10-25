@@ -44,10 +44,13 @@ func (l *Layer) feedForwardDeep(layerInput []*Value) {
 	}
 }
 
-func (l *Layer) parameters() *[][]*Value {
-	params := make([][]*Value, len(l.neurons))
+func (l *Layer) parameters() []*Value {
+	params := make([]*Value, 0)
 	for i := 0; i < len(l.neurons); i++ {
-		params[i] = l.neurons[i].parameters()
+		neuronParams := l.neurons[i].parameters()
+		for j := 0; j < len(neuronParams); j++ {
+			params = append(params, neuronParams[j])
+		}
 	}
-	return &params
+	return params
 }

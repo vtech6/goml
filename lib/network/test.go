@@ -32,11 +32,23 @@ func neuronTest() {
 	a := Neuron{}
 	a.initNeuron(3)
 	a.calculateOutput([]float64{1.0, -1.0, 2.0})
-	output := a.activation.tanh()
+
+	b := Neuron{}
+	b.initNeuron(1)
+	b.calculateOutputDeep([]*Value{a.activation})
+
+	output := b.activation
 	output.gradient = 1.0
 	output.backward()
 	output.calculateGradients()
-	fmt.Println(output.gradient, output.children[0].gradient, output.children[0].children[1].gradient)
+	for i := 0; i < 3; i++ {
+		fmt.Println("AW", i, ":", a.weights[i].gradient)
+	}
+
+	fmt.Println("BW", 0, ":", b.weights[0].gradient)
+	fmt.Println("BIAS:", a.bias)
+	fmt.Println("Activation:", a.activation.gradient)
+
 }
 
 //Calculate gradient after a chain of layer operations.
@@ -59,4 +71,53 @@ func layerTest() {
 	loss.backward()
 	loss.calculateGradients()
 	fmt.Println(loss.gradient, loss.children[0].gradient, layer2.neurons[0].activation.gradient, layer.neurons[0].activation.gradient)
+}
+func layerTest2() {
+	inputs := [][]float64{
+		{2.0, 3.0, -1.0},
+		{3.0, -1.0, 0.5},
+		{0.5, 1.0, 1.0},
+		{1.0, 1.0, -1.0}}
+
+	targets := []float64{1.0, -1.0, -1.0, 1.0}
+	var _layer Layer
+	layer := _layer.initLayer(3, 3)
+	layer2 := _layer.initLayer(3, 1)
+	var value Value
+	for step := 0; step < 10; step++ {
+
+		loss := value.init(0.0)
+		for i := 0; i < len(inputs); i++ {
+			layer.feedForward([]float64{1.0, -1.0, 2.0})
+			layer2.feedForwardDeep(layer.output)
+
+			output := layer2.output[0]
+			diff := value.init(targets[i]).add(output.multiply(value.init(-1)))
+			loss = diff.square().add(loss)
+		}
+		parameters := make([]*Value, 0)
+		l1p := layer.parameters()
+		for i := 0; i < len(l1p); i++ {
+			parameters = append(parameters, l1p[i])
+		}
+		l2p := layer2.parameters()
+		for i := 0; i < len(l2p); i++ {
+			parameters = append(parameters, l2p[i])
+		}
+
+		for paramI := 0; paramI < len(parameters); paramI++ {
+			fmt.Println(parameters[paramI].gradient)
+			parameters[paramI].gradient = 0
+
+		}
+		loss.gradient = 1.0
+		loss.backward()
+		loss.calculateGradients()
+		for paramI := 0; paramI < len(parameters); paramI++ {
+			parameters[paramI].value += parameters[paramI].gradient
+		}
+
+		fmt.Println(step, loss.value)
+	}
+
 }

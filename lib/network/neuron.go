@@ -23,28 +23,42 @@ func (n *Neuron) initNeuron(inputLength int) {
 
 func (n *Neuron) calculateOutput(neuronInput []float64) {
 	var value Value
-	var activation Value
+	activations := make([]*Value, len(n.weights))
 	for i := 0; i < len(neuronInput); i++ {
 		output := n.weights[i].multiply(value.init(neuronInput[i]))
 		output = output.add(n.bias)
-		activation = *output.tanh()
+		activations[i] = output
 
 	}
-	n.activation = &activation
+	activation := activations[0]
+	for i := 1; i < len(activations); i++ {
+		activation = activation.add(activations[i])
+	}
+	activation = activation.tanh()
+	n.activation = activation
 }
 
 //Deep neurons have an input of type Value, because they are fed the output of
 //the previous layer of neurons.
 
 func (n *Neuron) calculateOutputDeep(neuronInput []*Value) {
-	var activation Value
-	for i := 0; i < len(neuronInput); i++ {
+	activations := make([]*Value, len(n.weights))
 
+	for i := 0; i < len(neuronInput); i++ {
 		output := n.weights[i].multiply(neuronInput[i])
 		output = output.add(n.bias)
-		activation = *output.tanh()
+		activations[i] = output
 	}
-	n.activation = &activation
+
+	activation := activations[0]
+	for i := 1; i < len(activations); i++ {
+		if activations[i] != nil {
+			activation = activation.add(activations[i])
+		}
+	}
+
+	activation = activation.tanh()
+	n.activation = activation
 }
 
 func (n *Neuron) parameters() []*Value {
@@ -60,18 +74,14 @@ func (n *Neuron) parameters() []*Value {
 
 func buildTopo(v *Value, topo *[]*Value) {
 	_topo := *topo
-	presentInTopo := false
 	for i := 0; i < len(_topo); i++ {
 		for j := 0; j < len(v.children); j++ {
 			if _topo[i] == v.children[j] {
-				presentInTopo = true
 			}
 		}
 	}
 	for i := 0; i < len(v.children); i++ {
-		if presentInTopo == false {
-			*topo = append(*topo, v.children[i])
-			buildTopo(v.children[i], topo)
-		}
+		*topo = append(*topo, v.children[i])
+		buildTopo(v.children[i], topo)
 	}
 }

@@ -2,7 +2,6 @@ package network
 
 import (
 	"fmt"
-	"math/rand"
 )
 
 type Input struct {
@@ -56,12 +55,26 @@ func (m *MLP) calculateOutput(networkInput []float64) []*Value {
 	return m.layers[len(m.layers)-2].output
 }
 
+func (m *MLP) parameters() []*Value {
+	parameters := make([]*Value, 0)
+	for i := 0; i < len(m.layers)-1; i++ {
+		layerParams := m.layers[i].parameters()
+		for j := 0; j < len(layerParams); j++ {
+			parameters = append(parameters, layerParams[j])
+
+		}
+
+	}
+	return parameters
+}
+
 func runNetwork(params NetworkParams) {
 	inputs := params.trainX
 	targets := params.trainY
 	shape := params.shape
 	steps := params.steps
 	learningRate := params.learningRate
+	fmt.Println(learningRate)
 	network := MLP{}
 	network.initNetwork(shape, learningRate, steps)
 	//For step in steps we repeat the following process:
@@ -76,6 +89,7 @@ func runNetwork(params NetworkParams) {
 	//Missing: batches, epochs and the gradient calculation for weights is still
 	//buggy.
 	for step := 0; step < steps; step++ {
+
 		var value Value
 		loss := value.init(0.0)
 		outputs := make([]*Value, len(inputs))
@@ -91,32 +105,28 @@ func runNetwork(params NetworkParams) {
 
 		for outputIndex := 0; outputIndex < len(outputs); outputIndex++ {
 			targetValue := value.init(targets[outputIndex])
-			negativeOutput := outputs[outputIndex].negative()
+			negativeOutput := outputs[outputIndex].multiply(value.init(-1.0))
 			yDifference := negativeOutput.add(targetValue)
-			loss = loss.add(yDifference.tanh())
+			loss = yDifference.square().add(loss)
 			fmt.Println("Prediction", outputIndex, " ", outputs[outputIndex].value)
 		}
 
+		parameters := network.parameters()
+		for paramIndex := 0; paramIndex < len(parameters); paramIndex++ {
+			parameters[paramIndex].gradient = 0.0
+		}
 		//Gradient at the end is always 1.0
-
 		loss.gradient = 1.0
+
 		loss.backward()
 		loss.calculateGradients()
 
-		//Parse our network and adjust each variable by gradient
-		for layerIndex := 0; layerIndex < len(network.layers)-1; layerIndex++ {
-			layer := network.layers[layerIndex]
-			for neuronIndex := 0; neuronIndex < len(layer.neurons); neuronIndex++ {
-				neuron := layer.neurons[neuronIndex]
-				for valueIndex := 0; valueIndex < len(neuron.weights); valueIndex++ {
-					//Replace line below with gradient
-					weight := neuron.weights[valueIndex].value * rand.Float64()
-					weight += neuron.weights[valueIndex].value
-					neuron.weights[valueIndex].value = weight
-				}
-				neuron.bias.value += neuron.bias.value * neuron.bias.gradient * learningRate
-			}
+		for paramIndex := 0; paramIndex < len(parameters); paramIndex++ {
+			parameter := parameters[paramIndex]
+			parameter.value += parameter.gradient * -learningRate
 		}
+		//Parse our network and adjust each variable by gradient
+
 		fmt.Println("---------")
 		fmt.Println("Step", step, ", Loss:", loss.value)
 		fmt.Println("---------")
@@ -124,11 +134,11 @@ func runNetwork(params NetworkParams) {
 	//Below we test if the network can generalize on a data sample. This should
 	//be expanded to accept testX and testY, then produce the accuracy of our
 	//network. For now we have this minimalistic test.
-	val1 := network.calculateOutput([]float64{2.5, 2.5, -0.1})
-	fmt.Println("Expected output: ~(-1)")
+	val1 := network.calculateOutput([]float64{2.5, 2.5, -2.0})
+	fmt.Println("Expected output: ~(1)")
 	fmt.Println("VALIDATION: ", val1[0].value)
 
-	val2 := network.calculateOutput([]float64{-3, 0, -0.01})
-	fmt.Println("Expected output: ~(1)")
+	val2 := network.calculateOutput([]float64{3, -1, 0})
+	fmt.Println("Expected output: ~(-1)")
 	fmt.Println("VALIDATION: ", val2[0].value)
 }
