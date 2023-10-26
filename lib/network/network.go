@@ -44,7 +44,7 @@ func (m *MLP) initNetwork(shape []int, learningRate float64, steps int) {
 //hidden layer and return one output Y.
 
 func (m *MLP) calculateOutput(networkInput []float64) []*Value {
-	for i := 0; i < len(networkInput); i++ {
+	for i := 0; i < len(m.layers)-1; i++ {
 		if i == 0 {
 			m.layers[i].feedForward(networkInput)
 		} else {
