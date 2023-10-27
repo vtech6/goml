@@ -18,7 +18,7 @@ type MLP struct {
 
 type NetworkParams struct {
 	trainX       [][]float64
-	trainY       []float64
+	trainY       [][]float64
 	shape        []int
 	learningRate float64
 	steps        int
@@ -103,11 +103,13 @@ func runNetwork(params NetworkParams) {
 		//the previously accumulated loss.
 
 		for outputIndex := 0; outputIndex < len(outputs); outputIndex++ {
-			targetValue := value.init(targets[outputIndex])
-			negativeOutput := outputs[outputIndex].multiply(value.init(-1.0))
-			yDifference := negativeOutput.add(targetValue)
-			loss = yDifference.square().add(loss)
-			fmt.Println("Prediction", outputIndex, " ", outputs[outputIndex].value)
+			for valueIndex := range targets[0] {
+				targetValue := value.init(targets[outputIndex][valueIndex])
+				negativeOutput := outputs[outputIndex].multiply(value.init(-1.0))
+				yDifference := negativeOutput.add(targetValue)
+				loss = yDifference.square().add(loss)
+				fmt.Println("Prediction", outputIndex, " ", outputs[outputIndex].value)
+			}
 		}
 
 		parameters := network.parameters()
