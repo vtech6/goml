@@ -87,51 +87,54 @@ func runNetwork(params NetworkParams) {
 
 	//Missing: batches, epochs
 
-	for step := 0; step < steps; step++ {
+	runEpochs(2, func(epochIndex int) {
+		for step := 0; step < steps; step++ {
 
-		var value Value
-		loss := value.init(0.0)
-		outputs := make([]*Value, len(inputs))
-		//For input of inputs
-		for inputIndex := 0; inputIndex < len(inputs); inputIndex++ {
-			//Calculate output and add its value to outputs
-			output := network.calculateOutput(inputs[inputIndex])
-			outputs[inputIndex] = output[0]
-		}
-
-		//Calculate loss for each x from the training set and add it to
-		//the previously accumulated loss.
-
-		for outputIndex := 0; outputIndex < len(outputs); outputIndex++ {
-			for valueIndex := range targets[0] {
-				targetValue := value.init(targets[outputIndex][valueIndex])
-				negativeOutput := outputs[outputIndex].multiply(value.init(-1.0))
-				yDifference := negativeOutput.add(targetValue)
-				loss = yDifference.square().add(loss)
-				fmt.Println("Prediction", outputIndex, " ", outputs[outputIndex].value)
+			var value Value
+			loss := value.init(0.0)
+			outputs := make([]*Value, len(inputs))
+			//For input of inputs
+			for inputIndex := 0; inputIndex < len(inputs); inputIndex++ {
+				//Calculate output and add its value to outputs
+				output := network.calculateOutput(inputs[inputIndex])
+				outputs[inputIndex] = output[0]
 			}
+
+			//Calculate loss for each x from the training set and add it to
+			//the previously accumulated loss.
+
+			for outputIndex := 0; outputIndex < len(outputs); outputIndex++ {
+				for valueIndex := range targets[0] {
+					targetValue := value.init(targets[outputIndex][valueIndex])
+					negativeOutput := outputs[outputIndex].multiply(value.init(-1.0))
+					yDifference := negativeOutput.add(targetValue)
+					loss = yDifference.square().add(loss)
+					fmt.Println("Prediction", outputIndex, " ", outputs[outputIndex].value, "Target", targets[outputIndex])
+				}
+			}
+
+			parameters := network.parameters()
+			for paramIndex := 0; paramIndex < len(parameters); paramIndex++ {
+				parameters[paramIndex].gradient = 0.0
+			}
+			//Gradient at the end is always 1.0
+			loss.gradient = 1.0
+
+			loss.backward()
+			loss.calculateGradients()
+
+			for paramIndex := 0; paramIndex < len(parameters); paramIndex++ {
+				parameter := parameters[paramIndex]
+				parameter.value += parameter.gradient * -learningRate
+			}
+			//Parse our network and adjust each variable by gradient
+
+			fmt.Println("---------")
+			fmt.Println("Epoch", epochIndex+1, ", Step", step+1, ", Loss:", loss.value)
+			fmt.Println("---------")
 		}
 
-		parameters := network.parameters()
-		for paramIndex := 0; paramIndex < len(parameters); paramIndex++ {
-			parameters[paramIndex].gradient = 0.0
-		}
-		//Gradient at the end is always 1.0
-		loss.gradient = 1.0
-
-		loss.backward()
-		loss.calculateGradients()
-
-		for paramIndex := 0; paramIndex < len(parameters); paramIndex++ {
-			parameter := parameters[paramIndex]
-			parameter.value += parameter.gradient * -learningRate
-		}
-		//Parse our network and adjust each variable by gradient
-
-		fmt.Println("---------")
-		fmt.Println("Step", step, ", Loss:", loss.value)
-		fmt.Println("---------")
-	}
+	})
 	//Below we test if the network can generalize on a data sample. This should
 	//be expanded to accept testX and testY, then produce the accuracy of our
 	//network. For now we have this minimalistic test.
