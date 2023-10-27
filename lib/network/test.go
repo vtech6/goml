@@ -135,8 +135,12 @@ func mlpTest() {
 	shape := []int{3, 4, 4, 1}
 	learningRate := 0.01
 	steps := 100
+	batchSize := 1
+	nEpochs := 2
 
 	runNetwork(NetworkParams{
+		nEpochs:      nEpochs,
+		batchSize:    batchSize,
 		trainX:       inputs,
 		trainY:       targets,
 		shape:        shape,
