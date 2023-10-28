@@ -116,7 +116,7 @@ func runNetwork(params NetworkParams) {
 						targetValue := value.init(targets[outputIndex][valueIndex])
 						negativeOutput := outputs[outputIndex].multiply(value.init(-1.0))
 						yDifference := negativeOutput.add(targetValue)
-						loss = yDifference.square().add(loss)
+						loss = yDifference.pow(2).add(loss)
 						fmt.Println("Prediction", outputIndex+1, " ", outputs[outputIndex].value, "Target", targets[outputIndex])
 					}
 				}

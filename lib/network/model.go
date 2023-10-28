@@ -28,7 +28,6 @@ func (v *Value) init(value float64) *Value {
 	newValue.backward = func() {
 	}
 	return &newValue
-
 }
 
 //The operations below allow us to do arithmetic on our custom Value type.
@@ -69,12 +68,28 @@ func (v *Value) tanh() *Value {
 	return &output
 }
 
-func (v *Value) square() *Value {
-	output := Value{value: v.value * v.value, children: []*Value{v}}
+func (v *Value) exp() *Value {
+	output := Value{value: math.Exp(v.value), children: []*Value{v}}
 	output.backward = func() {
-		v.gradient += 2 * (v.value) * output.gradient
+		v.gradient += (output.value * output.gradient)
 	}
-	v.operation = "square"
+	return &output
+}
+
+func (v *Value) pow(input float64) *Value {
+	output := Value{value: math.Pow(v.value, input), children: []*Value{v}}
+	output.backward = func() {
+		v.gradient += (input * (math.Pow(v.value, input-1)) * output.gradient)
+	}
+	v.operation = "pow"
+	return &output
+}
+
+func (v *Value) log() *Value {
+	output := Value{value: math.Log10(v.value), children: []*Value{v}}
+	output.backward = func() {
+		v.gradient += ((1 / (v.value * math.Ln10)) * output.gradient)
+	}
 	return &output
 }
 
