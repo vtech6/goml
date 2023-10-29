@@ -101,6 +101,7 @@ func runNetwork(params NetworkParams) {
 	maxValue := 0.0
 
 	runEpochs(nEpochs, func(epochIndex int) {
+		var value Value
 		if verbose {
 			fmt.Println("---------")
 			fmt.Println("Epoch", epochIndex+1)
@@ -110,32 +111,19 @@ func runNetwork(params NetworkParams) {
 			inputs := xBatches[batchIndex]
 			targets := yBatches[batchIndex]
 			for step := 0; step < steps; step++ {
-
-				var value Value
 				loss := value.init(0.0)
-				outputs := make([]*Value, len(inputs))
-				//For input of inputs
-				for inputIndex := 0; inputIndex < len(inputs); inputIndex++ {
-					//Calculate output and add its value to outputs
-					output := network.calculateOutput(inputs[inputIndex])
-					outputs[inputIndex] = output[0]
-					if output[0].value > maxValue {
-						maxValue = output[0].value
-					}
-					if output[0].value < minValue {
-						minValue = output[0].value
-					}
-				}
-
-				//Calculate loss for each x from the training set and add it to
-				//the previously accumulated loss.
-
-				for outputIndex := 0; outputIndex < len(outputs); outputIndex++ {
+				for outputIndex := 0; outputIndex < len(inputs); outputIndex++ {
+					outputs := network.calculateOutput(inputs[outputIndex])
 					for valueIndex := range targets[0] {
+						if outputs[valueIndex].value < minValue {
+							minValue = outputs[valueIndex].value
+						}
+						if outputs[valueIndex].value > maxValue {
+							maxValue = outputs[valueIndex].value
+						}
 						targetValue := value.init(targets[outputIndex][valueIndex])
-						var output *Value
-						output = outputs[outputIndex]
-						negativeOutput := output.multiply(value.init(-1.0))
+						_output := outputs[valueIndex]
+						negativeOutput := _output.multiply(value.init(-1.0))
 						yDifference := negativeOutput.add(targetValue)
 						loss = yDifference.pow(2).add(loss)
 					}
