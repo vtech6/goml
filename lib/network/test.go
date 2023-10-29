@@ -94,7 +94,7 @@ func layerTest2() {
 
 			output := layer2.output[0]
 			diff := value.init(targets[i]).add(output.multiply(value.init(-1)))
-			loss = diff.square().add(loss)
+			loss = diff.pow(2).add(loss)
 		}
 		parameters := make([]*Value, 0)
 		l1p := layer.parameters()
