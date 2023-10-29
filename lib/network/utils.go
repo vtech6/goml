@@ -31,18 +31,18 @@ func generateBias() float64 {
 }
 
 func shuffleData(data [][]string) {
-	for i := 0; i < len(data)*100; i++ {
-		index := int(math.Floor(rand.Float64() * float64(len(data))))
-
-		index2 := int(math.Floor(rand.Float64() * float64(len(data))))
-		original := data[index2]
-		random := data[index]
-		data[index2] = random
-		data[index] = original
+	for times := 0; times < 10; times++ {
+		for i := len(data) - 1; i > 0; i-- {
+			j := int(math.Floor(rand.Float64() * float64(i+1)))
+			original := data[i]
+			random := data[j]
+			data[i] = random
+			data[j] = original
+		}
 	}
 }
 
-func loadIrisData() ([][]float64, [][]float64) {
+func loadIrisData() ([][]float64, [][]float64, [][]float64, [][]float64) {
 	file, error := os.Open("./lib/dataset/IRIS.csv")
 	if error != nil {
 		log.Fatal(error)
@@ -56,7 +56,7 @@ func loadIrisData() ([][]float64, [][]float64) {
 	}
 	shuffleData(data[1:])
 
-	return createIrisData(data)
+	return trainTestSplit(createIrisData(data))
 }
 
 func createIrisData(data [][]string) ([][]float64, [][]float64) {
@@ -78,16 +78,16 @@ func createIrisData(data [][]string) ([][]float64, [][]float64) {
 				if j == 4 {
 					for labelIndex, label := range labels {
 						if label == entry {
-							var _value float64
+							var _value []float64
 							switch labelIndex {
 							case 0:
-								_value = -1
+								_value = []float64{1}
 							case 1:
-								_value = 0
+								_value = []float64{0}
 							case 2:
-								_value = 1
+								_value = []float64{-1}
 							}
-							yValues = append(yValues, []float64{_value})
+							yValues = append(yValues, _value)
 						}
 					}
 				}
@@ -117,4 +117,9 @@ func getMiniBatches(batchSize int, inputs [][]float64, targets [][]float64) ([][
 		_targets = append(_targets, targets[firstIndex:lastIndex])
 	}
 	return _inputs, _targets
+}
+
+func trainTestSplit(dataX [][]float64, dataY [][]float64) ([][]float64, [][]float64, [][]float64, [][]float64) {
+	splitIndex := int(math.Floor(float64(len(dataX)-1) * 0.8))
+	return dataX[:splitIndex], dataY[:splitIndex], dataX[splitIndex:], dataY[splitIndex:]
 }

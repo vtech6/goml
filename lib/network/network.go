@@ -2,6 +2,7 @@ package network
 
 import (
 	"fmt"
+	"math"
 )
 
 type Input struct {
@@ -21,9 +22,12 @@ type NetworkParams struct {
 	batchSize    int
 	trainX       [][]float64
 	trainY       [][]float64
+	testX        [][]float64
+	testY        [][]float64
 	shape        []int
 	learningRate float64
 	steps        int
+	verbose      bool
 }
 
 //To initialize MLP we pass it a shape. This is an array that describes how
@@ -74,10 +78,12 @@ func runNetwork(params NetworkParams) {
 	batchSize := params.batchSize
 	trainX := params.trainX
 	trainY := params.trainY
+	testX := params.testX
+	testY := params.testY
 	shape := params.shape
 	steps := params.steps
+	verbose := params.verbose
 	learningRate := params.learningRate
-	fmt.Println(learningRate)
 	network := MLP{}
 	network.initNetwork(shape, learningRate, steps)
 	//For step in steps we repeat the following process:
@@ -91,8 +97,15 @@ func runNetwork(params NetworkParams) {
 
 	//Missing: batches, epochs
 	xBatches, yBatches := getMiniBatches(batchSize, trainX, trainY)
+	minValue := 0.0
+	maxValue := 0.0
 
 	runEpochs(nEpochs, func(epochIndex int) {
+		if verbose {
+			fmt.Println("---------")
+			fmt.Println("Epoch", epochIndex+1)
+			fmt.Println("---------")
+		}
 		for batchIndex := range xBatches {
 			inputs := xBatches[batchIndex]
 			targets := yBatches[batchIndex]
@@ -106,6 +119,12 @@ func runNetwork(params NetworkParams) {
 					//Calculate output and add its value to outputs
 					output := network.calculateOutput(inputs[inputIndex])
 					outputs[inputIndex] = output[0]
+					if output[0].value > maxValue {
+						maxValue = output[0].value
+					}
+					if output[0].value < minValue {
+						minValue = output[0].value
+					}
 				}
 
 				//Calculate loss for each x from the training set and add it to
@@ -114,10 +133,11 @@ func runNetwork(params NetworkParams) {
 				for outputIndex := 0; outputIndex < len(outputs); outputIndex++ {
 					for valueIndex := range targets[0] {
 						targetValue := value.init(targets[outputIndex][valueIndex])
-						negativeOutput := outputs[outputIndex].multiply(value.init(-1.0))
+						var output *Value
+						output = outputs[outputIndex]
+						negativeOutput := output.multiply(value.init(-1.0))
 						yDifference := negativeOutput.add(targetValue)
 						loss = yDifference.pow(2).add(loss)
-						fmt.Println("Prediction", outputIndex+1, " ", outputs[outputIndex].value, "Target", targets[outputIndex])
 					}
 				}
 
@@ -136,22 +156,32 @@ func runNetwork(params NetworkParams) {
 					parameter.value += parameter.gradient * -learningRate
 				}
 				//Parse our network and adjust each variable by gradient
-
-				fmt.Println("---------")
-				fmt.Println("Epoch", epochIndex+1, ", Batch", batchIndex+1, ", Step", step+1, ", Loss:", loss.value)
-				fmt.Println("---------")
+				if verbose {
+					fmt.Println("Batch", batchIndex+1, ", Step", step+1, ", Loss:", loss.value)
+				}
 			}
 		}
 
 	})
+	fmt.Println("---------")
+	fmt.Println("VALIDATION:")
+	fmt.Println("---------")
+	minMaxScale := maxValue - minValue
 	//Below we test if the network can generalize on a data sample. This should
 	//be expanded to accept testX and testY, then produce the accuracy of our
 	//network. For now we have this minimalistic test.
-	val1 := network.calculateOutput(trainX[0])
-	fmt.Println("Expected output:", trainY[0][0])
-	fmt.Println("VALIDATION: ", val1[0].value)
+	accuracy := 0.0
+	for i := range testX {
+		val := network.calculateOutput(testX[i])
+		outputValue := math.Round((val[0].value-minValue)/minMaxScale*2) - 1
+		targetValue := testY[i][0]
+		fmt.Println("Expected output:", targetValue, "Prediction:", outputValue)
+		if outputValue == targetValue {
+			accuracy += 1
+		}
+	}
+	accuracy = float64(accuracy) / float64(len(testY))
+	fmt.Println("--------")
+	fmt.Println("Test accuracy: ", accuracy)
 
-	val2 := network.calculateOutput(trainX[1])
-	fmt.Println("Expected output:", trainY[1][0])
-	fmt.Println("VALIDATION: ", val2[0].value)
 }

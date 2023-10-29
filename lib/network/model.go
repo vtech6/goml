@@ -93,6 +93,22 @@ func (v *Value) log() *Value {
 	return &output
 }
 
+func (v *Value) crossEntropy(scaleFactor float64, sumExp *Value, prediction *Value, target float64) *Value {
+	output := Value{children: []*Value{v}}
+	probability := math.Exp(prediction.value) / sumExp.value
+	output.value = (-math.Log(probability) * target * scaleFactor)
+	output.backward = func() {
+		delta := probability * output.gradient
+		if target == 0.0 {
+			prediction.gradient += (probability * output.gradient)
+		} else {
+			prediction.gradient += ((scaleFactor * (delta - 1)) + ((1 - scaleFactor) * delta)) * output.gradient
+		}
+		v.gradient += delta * scaleFactor
+	}
+	return &output
+}
+
 //The function below builds the tree of nodes, then runs backward propagation
 //by multiplying the values by their respective gradient and learning rate.
 //Learning rate to be implemented (for now we can think of it as value 1).
