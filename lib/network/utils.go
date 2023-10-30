@@ -97,12 +97,32 @@ func createIrisData(data [][]string) ([][]float64, [][]float64) {
 			xValues = append(xValues, _xValues)
 		}
 	}
+	minMaxData(xValues)
 	return xValues, yValues
 }
 
 func runEpochs(epochs int, function func(int)) {
 	for i := 0; i < epochs; i++ {
 		function(i)
+	}
+}
+
+func minMaxData(data [][]float64) {
+	for i := range data[0] {
+		minVal := 5.0
+		maxVal := 0.0
+		for j := range data {
+			if data[j][i] < minVal {
+				minVal = data[j][i]
+			}
+			if data[j][i] > maxVal {
+				maxVal = data[j][i]
+			}
+
+		}
+		for j := range data {
+			data[j][i] = (data[j][i] - minVal) / (maxVal - minVal)
+		}
 	}
 }
 
