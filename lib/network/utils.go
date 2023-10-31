@@ -42,7 +42,7 @@ func shuffleData(data [][]string) {
 	}
 }
 
-func loadIrisData() ([][]float64, [][]float64, [][]float64, [][]float64) {
+func loadIrisData(trainTestSplitRatio float64) ([][]float64, [][]float64, [][]float64, [][]float64) {
 	file, error := os.Open("./lib/dataset/IRIS.csv")
 	if error != nil {
 		log.Fatal(error)
@@ -55,8 +55,9 @@ func loadIrisData() ([][]float64, [][]float64, [][]float64, [][]float64) {
 		log.Fatal(error)
 	}
 	shuffleData(data[1:])
+	x, y := createIrisData(data)
 
-	return trainTestSplit(createIrisData(data))
+	return trainTestSplit(x, y, trainTestSplitRatio)
 }
 
 func createIrisData(data [][]string) ([][]float64, [][]float64) {
@@ -139,7 +140,7 @@ func getMiniBatches(batchSize int, inputs [][]float64, targets [][]float64) ([][
 	return _inputs, _targets
 }
 
-func trainTestSplit(dataX [][]float64, dataY [][]float64) ([][]float64, [][]float64, [][]float64, [][]float64) {
-	splitIndex := int(math.Floor(float64(len(dataX)-1) * 0.8))
+func trainTestSplit(dataX [][]float64, dataY [][]float64, ratio float64) ([][]float64, [][]float64, [][]float64, [][]float64) {
+	splitIndex := int(math.Floor(float64(len(dataX)-1) * ratio))
 	return dataX[:splitIndex], dataY[:splitIndex], dataX[splitIndex:], dataY[splitIndex:]
 }
