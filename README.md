@@ -3,10 +3,10 @@ Neural Networks from scratch in Go (standard library only)
 
 <body>This repo was created with two goals in mind:
   
-- Check my understanding of neural networks and the ability to implement them accordingly
+- Check my understanding of neural networks
 - Verify if Go is the language I would choose when building systems of higher technical and intellectual complexity
 
-To make sure I do understand the issue at hand, I decided to forgo any external libraries and implement all data types and functions myself. To keep track, I will list the limitations and goals below.
+To make sure I do understand the issue, I decided to forgo any external libraries and implement all data types and functions myself. To keep track, I will list the limitations and goals below.
 
 <b>Limitations: </b>
 - No external libraries or modules
@@ -14,7 +14,8 @@ To make sure I do understand the issue at hand, I decided to forgo any external 
 
 <b>Goal: </b>
 - Multilayer Perceptron (done)
-- Support for multiple outputs (in progress)
+- Binary classification (done)
+- Support for multiple outputs (Multiple classification) (in progress)
 </body>
 
 <b>Current status:</b>
@@ -23,6 +24,8 @@ To make sure I do understand the issue at hand, I decided to forgo any external 
 - Define gradient methods and neural structure (heavily inspired by Karpathy's video)
 - Backpropagate and train for k steps
 - Produce and validate output
+- More activation functions (Sigmoid and ReLU)
+- Binary crossentropy
 
 <b>References and inspiration:</b>
 - [Sebastian Lauge's Neural Networks Video](https://www.youtube.com/watch?v=hfMk-kjRv4c)
@@ -33,4 +36,4 @@ To make sure I do understand the issue at hand, I decided to forgo any external 
 - Make sure you have a valid Go installation by running `go version`
 - Clone the repo
 - Run with `go run .`
-- The network should run for `100 steps` by default with a learning rate of `0.01`. You can tweak these parameters inside the `lib/network/run.go` file.
+- The network parameters can be tweaked inside the `lib/network/run.go` file. The dataset labels can be changed inside `lib/network/utils.go`. Neuron activation functions can be found under `lib/network/neuron.go` and the engine blocks can be found under `lib/network/model.go`.
