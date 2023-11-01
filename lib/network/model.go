@@ -68,10 +68,24 @@ func (v *Value) tanh() *Value {
 	return &output
 }
 
-func (v *Value) exp() *Value {
-	output := Value{value: math.Exp(v.value), children: []*Value{v}}
+func (v *Value) relu() *Value {
+	loss := math.Max(0, v.value)
+	output := Value{children: []*Value{v}, operation: "RELU", value: loss}
 	output.backward = func() {
-		v.gradient += (output.value * output.gradient)
+		derivative := 0.0
+		if v.value > 0 {
+			derivative = 1
+		}
+		v.gradient += derivative * output.gradient
+	}
+	return &output
+}
+
+func (v *Value) sigmoid() *Value {
+	activation := (1.0 / (1.0 + math.Exp(-v.value)))
+	output := Value{value: activation, children: []*Value{v}, operation: "SIGMOID"}
+	output.backward = func() {
+		v.gradient += (activation * (1 - activation)) * output.gradient
 	}
 	return &output
 }
@@ -93,18 +107,60 @@ func (v *Value) log() *Value {
 	return &output
 }
 
-func (v *Value) crossEntropy(scaleFactor float64, sumExp *Value, prediction *Value, target float64) *Value {
-	output := Value{children: []*Value{v}}
-	probability := math.Exp(prediction.value) / sumExp.value
-	output.value = (-math.Log(probability) * target * scaleFactor)
+func (v *Value) exp() *Value {
+	output := Value{value: math.Exp(v.value), children: []*Value{v}, operation: "EXP"}
 	output.backward = func() {
-		delta := probability * output.gradient
-		if target == 0.0 {
-			prediction.gradient += (probability * output.gradient)
-		} else {
-			prediction.gradient += ((scaleFactor * (delta - 1)) + ((1 - scaleFactor) * delta)) * output.gradient
+		v.gradient += (output.value * output.gradient)
+	}
+	return &output
+}
+
+func (v *Value) softmax(inputs []*Value, inputIndex int) *Value {
+	sumExp := 0.0
+	for i := range inputs {
+		sumExp += math.Exp(inputs[i].value)
+	}
+	e := math.Exp(inputs[inputIndex].value) / sumExp
+	output := Value{value: e, children: []*Value{inputs[inputIndex]}}
+	output.backward = func() {
+		for i := range inputs {
+			if i == inputIndex {
+				inputs[inputIndex].gradient += (e * (1 - e)) * output.gradient
+			} else {
+				inputs[inputIndex].gradient += (-e * (math.Exp(inputs[inputIndex].value))) * output.gradient
+			}
 		}
-		v.gradient += delta * scaleFactor
+	}
+	return &output
+}
+
+func (v *Value) binaryCrossEntropy(dataLength int, target float64) *Value {
+	loss := 0.0
+	ratio := 1.0 / float64(dataLength)
+	log := math.Log(v.value)
+	loss = -(ratio * log)
+	output := Value{children: []*Value{v}, value: loss}
+	output.backward = func() {
+		logLoss := target*log + ((1 - target) * math.Log(1-v.value))
+		v.gradient += logLoss * output.gradient
+	}
+
+	return &output
+}
+
+func (v *Value) crossEntropy(inputs []*Value, targets []float64, valueIndex int) *Value {
+	y := targets[valueIndex]
+	loss := 0.0
+	if y == 1 {
+		loss = -math.Log(v.value)
+	} else {
+		loss = -math.Log(1 - v.value)
+	}
+	output := Value{children: []*Value{v}, value: loss}
+	output.backward = func() {
+		for i := range inputs {
+			inputs[i].gradient += (inputs[i].value - targets[i]) * output.gradient
+		}
 	}
 	return &output
 }

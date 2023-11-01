@@ -1,7 +1,6 @@
 package network
 
 import (
-	"fmt"
 	"math/rand"
 )
 
@@ -13,13 +12,14 @@ func Run() {
 	//Currently the network is training and predicting on the whole IRIS set.
 	//Upcoming commits will handle train/test splitting of data and validation
 	//with proper metric such as accuracy.
+	trainTestSplitRatio := 0.8
 
-	trainX, trainY, testX, testY := loadIrisData()
-	shape := []int{4, 4, 4, 3}
+	trainX, trainY, testX, testY := loadIrisData(trainTestSplitRatio)
+	shape := []int{4, 4, 4, 1}
 	learningRate := 0.001
 	steps := 5
 	batchSize := 15
-	nEpochs := 2
+	nEpochs := 5
 
 	runNetwork(NetworkParams{
 		nEpochs:      nEpochs,
@@ -33,15 +33,4 @@ func Run() {
 		steps:        steps,
 		verbose:      true,
 	})
-	array1 := array()
-	array2 := make([][]*Value, 1)
-	array2[0] = array1
-	fmt.Println(array2[0][0].value)
-}
-
-func array() []*Value {
-	var value *Value
-	value1 := value.init(1)
-	value2 := value.init(2)
-	return []*Value{value1, value2}
 }
