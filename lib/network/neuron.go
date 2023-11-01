@@ -34,7 +34,7 @@ func (n *Neuron) calculateOutput(neuronInput []float64) {
 	for i := 1; i < len(activations); i++ {
 		activation = activation.add(activations[i])
 	}
-	activation = activation.tanh()
+	activation = activation.sigmoid()
 	n.activation = activation
 }
 
@@ -57,7 +57,7 @@ func (n *Neuron) calculateOutputDeep(neuronInput []*Value) {
 		}
 	}
 
-	activation = activation.tanh()
+	activation = activation.sigmoid()
 	n.activation = activation
 }
 

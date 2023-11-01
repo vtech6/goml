@@ -121,11 +121,12 @@ func runNetwork(params NetworkParams) {
 						if outputs[valueIndex].value > maxValue {
 							maxValue = outputs[valueIndex].value
 						}
+						//When trying different loss function, make sure to
+						//change the activation functions (for example from
+						//tanh to sigmoid for Binary Crossentropy etc.)
 						targetValue := value.init(targets[outputIndex][valueIndex])
 						_output := outputs[valueIndex]
-						negativeOutput := _output.multiply(value.init(-1.0))
-						yDifference := negativeOutput.add(targetValue)
-						loss = yDifference.pow(2).add(loss)
+						loss = _output.binaryCrossEntropy(len(targets), targetValue.value).add(loss)
 					}
 				}
 
@@ -161,15 +162,16 @@ func runNetwork(params NetworkParams) {
 	accuracy := 0.0
 	for i := range testX {
 		val := network.calculateOutput(testX[i])
-		outputValue := math.Round((val[0].value-minValue)/minMaxScale*2) - 1
+		outputValue := math.Round((val[0].value - minValue) / minMaxScale)
 		targetValue := testY[i][0]
-		fmt.Println("Expected output:", targetValue, "Prediction:", outputValue)
+		fmt.Println("Expected output:", targetValue, "Prediction:", outputValue, val[0].value)
 		if outputValue == targetValue {
 			accuracy += 1
 		}
 	}
 	accuracy = float64(accuracy) / float64(len(testY))
 	fmt.Println("--------")
-	fmt.Println("Test accuracy: ", accuracy)
+
+	fmt.Printf("Test accuracy:%.2f%s", math.Round(accuracy*100), "%")
 
 }

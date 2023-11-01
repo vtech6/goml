@@ -15,11 +15,11 @@ func Run() {
 	trainTestSplitRatio := 0.8
 
 	trainX, trainY, testX, testY := loadIrisData(trainTestSplitRatio)
-	shape := []int{4, 4, 4, 1}
-	learningRate := 0.001
-	steps := 5
+	shape := []int{4, 4, 3, 1}
+	learningRate := 0.05
+	steps := 2
 	batchSize := 15
-	nEpochs := 5
+	nEpochs := 10
 
 	runNetwork(NetworkParams{
 		nEpochs:      nEpochs,

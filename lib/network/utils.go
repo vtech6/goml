@@ -86,7 +86,7 @@ func createIrisData(data [][]string) ([][]float64, [][]float64) {
 							case 1:
 								_value = []float64{0}
 							case 2:
-								_value = []float64{-1}
+								_value = []float64{0}
 							}
 							yValues = append(yValues, _value)
 						}
