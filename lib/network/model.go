@@ -120,15 +120,12 @@ func (v *Value) softmax(inputs []*Value, inputIndex int) *Value {
 	for i := range inputs {
 		sumExp += math.Exp(inputs[i].value)
 	}
-	e := math.Exp(inputs[inputIndex].value) / sumExp
-	output := Value{value: e, children: []*Value{inputs[inputIndex]}}
+	e := math.Exp(v.value) / sumExp
+	output := Value{value: e, children: []*Value{v}}
 	output.backward = func() {
 		for i := range inputs {
-			if i == inputIndex {
-				inputs[inputIndex].gradient += (e * (1 - e)) * output.gradient
-			} else {
-				inputs[inputIndex].gradient += (-e * (math.Exp(inputs[inputIndex].value))) * output.gradient
-			}
+			exp := math.Exp(inputs[i].value)
+			inputs[i].gradient += ((exp*sumExp - math.Pow(exp, 2)) / (math.Pow(sumExp, 2))) * output.gradient
 		}
 	}
 	return &output
@@ -163,21 +160,21 @@ func (v *Value) binaryCrossEntropy(dataLength int, target float64) *Value {
 	return &output
 }
 
-func (v *Value) crossEntropy(inputs []*Value, targets []float64, valueIndex int) *Value {
-	y := targets[valueIndex]
+func categoricalCrossEntropy(outputs []*Value, targets []float64) *Value {
 	loss := 0.0
-	if y == 1 {
-		loss = -math.Log(v.value)
-	} else {
-		loss = -math.Log(1 - v.value)
+	for i := range outputs {
+		loss += -(targets[i] * (math.Log(outputs[i].value) + math.Pow(10, -100)))
 	}
-	output := Value{children: []*Value{v}, value: loss}
+	output := Value{value: loss, children: outputs, operation: "CCE"}
 	output.backward = func() {
-		for i := range inputs {
-			inputs[i].gradient += (inputs[i].value - targets[i]) * output.gradient
+		for i := range outputs {
+			if outputs[i].value != 0 {
+				outputs[i].gradient += (-(targets[i] / (outputs[i].value + (math.Pow(10, -100))))) * output.gradient
+			}
 		}
 	}
 	return &output
+
 }
 
 //The function below builds the tree of nodes, then runs backward propagation
