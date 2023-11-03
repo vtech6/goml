@@ -1,6 +1,7 @@
 package network
 
 import (
+	"fmt"
 	"math"
 )
 
@@ -124,8 +125,13 @@ func (v *Value) softmax(inputs []*Value, inputIndex int) *Value {
 	output := Value{value: e, children: []*Value{v}}
 	output.backward = func() {
 		for i := range inputs {
-			exp := math.Exp(inputs[i].value)
-			inputs[i].gradient += ((exp*sumExp - math.Pow(exp, 2)) / (math.Pow(sumExp, 2))) * output.gradient
+			for j := range inputs {
+				if i == j {
+					inputs[i].gradient += inputs[i].value * (1.0 - inputs[j].value) * output.gradient
+				} else {
+					inputs[i].gradient += (-inputs[j].value) * inputs[i].value * output.gradient
+				}
+			}
 		}
 	}
 	return &output
@@ -138,6 +144,10 @@ func (v *Value) mse(target float64) *Value {
 	yDifference := negativeOutput.add(targetValue)
 	powDifference := yDifference.pow(2)
 	return powDifference
+}
+
+func Mse(input *Value, target float64) *Value {
+	return input.mse(target)
 }
 
 func (v *Value) binaryCrossEntropy(dataLength int, target float64) *Value {
@@ -159,6 +169,9 @@ func (v *Value) binaryCrossEntropy(dataLength int, target float64) *Value {
 
 	return &output
 }
+func Bce(value *Value, dataLength int, target float64) *Value {
+	return value.binaryCrossEntropy(dataLength, target)
+}
 
 func categoricalCrossEntropy(outputs []*Value, targets []float64) *Value {
 	loss := 0.0
@@ -175,6 +188,36 @@ func categoricalCrossEntropy(outputs []*Value, targets []float64) *Value {
 	}
 	return &output
 
+}
+
+func softmax2(outputs []*Value) []*Value {
+	var value Value
+	sumExp := 0.0
+	newOutputs := make([]*Value, len(outputs))
+
+	for i := range outputs {
+		sumExp += math.Exp(outputs[i].value)
+	}
+
+	for i := range outputs {
+		exp := math.Exp(outputs[i].value)
+		softMaxed := exp / sumExp
+		newOutputs[i] = value.init(0.0)
+		newOutputs[i].value = softMaxed
+		newOutputs[i].children = outputs
+		newOutputs[i].backward = func() {
+			for j := range outputs {
+				if i == j {
+					outputs[i].gradient += outputs[i].value * (1.0 - outputs[j].value) * newOutputs[i].gradient
+				} else {
+					outputs[i].gradient += (-outputs[j].value) * outputs[i].value * newOutputs[j].gradient
+				}
+			}
+
+		}
+	}
+	fmt.Println(newOutputs[0].gradient)
+	return newOutputs
 }
 
 //The function below builds the tree of nodes, then runs backward propagation

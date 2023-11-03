@@ -42,7 +42,7 @@ func shuffleData(data [][]string) {
 	}
 }
 
-func loadIrisData(trainTestSplitRatio float64) ([][]float64, [][]float64, [][]float64, [][]float64) {
+func loadIrisData(trainTestSplitRatio float64, targetLabels [][]float64) ([][]float64, [][]float64, [][]float64, [][]float64) {
 	file, error := os.Open("./lib/dataset/IRIS.csv")
 	if error != nil {
 		log.Fatal(error)
@@ -55,12 +55,12 @@ func loadIrisData(trainTestSplitRatio float64) ([][]float64, [][]float64, [][]fl
 		log.Fatal(error)
 	}
 	shuffleData(data[1:])
-	x, y := createIrisData(data)
+	x, y := createIrisData(data, targetLabels)
 
 	return trainTestSplit(x, y, trainTestSplitRatio)
 }
 
-func createIrisData(data [][]string) ([][]float64, [][]float64) {
+func createIrisData(data [][]string, targetLabels [][]float64) ([][]float64, [][]float64) {
 	labels := []string{"Iris-setosa", "Iris-versicolor", "Iris-virginica"}
 	xValues := make([][]float64, 0)
 	yValues := make([][]float64, 0)
@@ -82,11 +82,11 @@ func createIrisData(data [][]string) ([][]float64, [][]float64) {
 							var _value []float64
 							switch labelIndex {
 							case 0:
-								_value = []float64{1}
+								_value = targetLabels[0]
 							case 1:
-								_value = []float64{0}
+								_value = targetLabels[1]
 							case 2:
-								_value = []float64{0}
+								_value = targetLabels[2]
 							}
 							yValues = append(yValues, _value)
 						}

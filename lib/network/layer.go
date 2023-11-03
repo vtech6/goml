@@ -5,7 +5,7 @@ type Layer struct {
 	output  []*Value
 }
 
-func (l *Layer) initLayer(nInputs int, nNeurons int) *Layer {
+func (l *Layer) initLayer(nInputs int, nNeurons int, neuronActivation string) *Layer {
 	var layer Layer
 	// For the shape of input generate a neuron
 	// Each Neuron initializes with random weights
@@ -14,7 +14,7 @@ func (l *Layer) initLayer(nInputs int, nNeurons int) *Layer {
 	layer.output = make([]*Value, nNeurons)
 	for i := 0; i < nNeurons; i++ {
 		neuron := Neuron{}
-		neuron.initNeuron(nInputs)
+		neuron.initNeuron(nInputs, neuronActivation)
 		neurons[i] = &neuron
 	}
 	layer.neurons = neurons

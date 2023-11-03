@@ -1,21 +1,23 @@
 package network
 
 type Neuron struct {
-	weights    []*Value
-	bias       *Value
-	activation *Value
+	weights            []*Value
+	bias               *Value
+	activation         *Value
+	activationFunction string
 }
 
 //We initialize each neuron with random weights in shape of the input and a
 //random bias.
 
-func (n *Neuron) initNeuron(inputLength int) {
+func (n *Neuron) initNeuron(inputLength int, neuronActivation string) {
 	var value Value
 	n.weights = make([]*Value, inputLength)
 	for i := 0; i < inputLength; i++ {
 		n.weights[i] = value.init(randomFloatStd())
 	}
 	n.bias = value.init(randomFloatStd())
+	n.activationFunction = neuronActivation
 }
 
 //Multiply each element of the input data with its corresponding weight in the
@@ -34,7 +36,12 @@ func (n *Neuron) calculateOutput(neuronInput []float64) {
 	for i := 1; i < len(activations); i++ {
 		activation = activation.add(activations[i])
 	}
-	activation = activation.sigmoid()
+	switch n.activationFunction {
+	case "tanh":
+		activation = activation.tanh()
+	default:
+		activation = activation.sigmoid()
+	}
 	n.activation = activation
 }
 
@@ -57,7 +64,12 @@ func (n *Neuron) calculateOutputDeep(neuronInput []*Value) {
 		}
 	}
 
-	activation = activation.sigmoid()
+	switch n.activationFunction {
+	case "tanh":
+		activation = activation.tanh()
+	default:
+		activation = activation.sigmoid()
+	}
 	n.activation = activation
 }
 

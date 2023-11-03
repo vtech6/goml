@@ -2,7 +2,6 @@ package network
 
 import (
 	"fmt"
-	"math"
 )
 
 type Input struct {
@@ -18,27 +17,29 @@ type MLP struct {
 }
 
 type NetworkParams struct {
-	nEpochs      int
-	batchSize    int
-	trainX       [][]float64
-	trainY       [][]float64
-	testX        [][]float64
-	testY        [][]float64
-	shape        []int
-	learningRate float64
-	steps        int
-	verbose      bool
+	nEpochs          int
+	batchSize        int
+	trainX           [][]float64
+	trainY           [][]float64
+	testX            [][]float64
+	testY            [][]float64
+	shape            []int
+	learningRate     float64
+	steps            int
+	verbose          bool
+	costFunction     string
+	neuronActivation string
 }
 
 //To initialize MLP we pass it a shape. This is an array that describes how
 //many layers of how many neurons will be in our model.
 //For example shape [2,3,1] would mean 2 inputs, 3 hidden layers and an output.
 
-func (m *MLP) initNetwork(shape []int, learningRate float64, steps int) {
+func (m *MLP) initNetwork(shape []int, learningRate float64, steps int, neuronActivation string) {
 	var layer Layer
 	m.layers = make([]*Layer, len(shape))
 	for i := 1; i < len(shape); i++ {
-		newLayer := layer.initLayer(shape[i-1], shape[i])
+		newLayer := layer.initLayer(shape[i-1], shape[i], neuronActivation)
 		m.layers[i-1] = newLayer
 	}
 }
@@ -84,8 +85,9 @@ func runNetwork(params NetworkParams) {
 	steps := params.steps
 	verbose := params.verbose
 	learningRate := params.learningRate
+	costFunction := params.costFunction
 	network := MLP{}
-	network.initNetwork(shape, learningRate, steps)
+	network.initNetwork(shape, learningRate, steps, params.neuronActivation)
 	//For step in steps we repeat the following process:
 	//1. Feed forward the data
 	//2. Calculate the output
@@ -114,19 +116,32 @@ func runNetwork(params NetworkParams) {
 				loss := value.init(0.0)
 				for outputIndex := 0; outputIndex < len(inputs); outputIndex++ {
 					outputs := network.calculateOutput(inputs[outputIndex])
-					for valueIndex := range targets[0] {
-						if outputs[valueIndex].value < minValue {
-							minValue = outputs[valueIndex].value
+					if len(targets[outputIndex]) == 1 {
+						for valueIndex := range targets[0] {
+							if outputs[valueIndex].value < minValue {
+								minValue = outputs[valueIndex].value
+							}
+							if outputs[valueIndex].value > maxValue {
+								maxValue = outputs[valueIndex].value
+							}
+							_output := outputs[valueIndex]
+							switch costFunction {
+							case "mse":
+								loss = Mse(_output, targets[outputIndex][valueIndex]).add(loss)
+							default:
+								loss = Bce(_output, len(targets), targets[outputIndex][valueIndex]).add(loss)
+							}
 						}
-						if outputs[valueIndex].value > maxValue {
-							maxValue = outputs[valueIndex].value
+					} else {
+						softMaxed := make([]*Value, len(outputs))
+						for i := range softMaxed {
+							softMaxed[i] = outputs[i].softmax(outputs, i)
 						}
+
+						loss = categoricalCrossEntropy(softMaxed, targets[outputIndex]).add(loss)
 						//When trying different loss function, make sure to
 						//change the activation functions (for example from
 						//tanh to sigmoid for Binary Crossentropy etc.)
-						targetValue := value.init(targets[outputIndex][valueIndex])
-						_output := outputs[valueIndex]
-						loss = _output.binaryCrossEntropy(len(targets), targetValue.value).add(loss)
 					}
 				}
 
@@ -160,18 +175,15 @@ func runNetwork(params NetworkParams) {
 	//be expanded to accept testX and testY, then produce the accuracy of our
 	//network. For now we have this minimalistic test.
 	accuracy := 0.0
-	for i := range testX {
-		val := network.calculateOutput(testX[i])
-		outputValue := math.Round((val[0].value - minValue) / minMaxScale)
-		targetValue := testY[i][0]
-		fmt.Println("Expected output:", targetValue, "Prediction:", outputValue, val[0].value)
-		if outputValue == targetValue {
-			accuracy += 1
-		}
+	switch costFunction {
+	case "mse":
+		accuracy = regressionMetrics(network, testX, minValue, minMaxScale, testY)
+	default:
+		accuracy = bceMetrics(network, testX, minValue, minMaxScale, testY)
+
 	}
-	accuracy = float64(accuracy) / float64(len(testY))
 	fmt.Println("--------")
 
-	fmt.Printf("Test accuracy:%.2f%s", math.Round(accuracy*100), "%")
+	fmt.Printf("Test accuracy:%.2f%s", accuracy, "%")
 
 }

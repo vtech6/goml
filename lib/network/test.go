@@ -30,11 +30,11 @@ func valueTest() {
 
 func neuronTest() {
 	a := Neuron{}
-	a.initNeuron(3)
+	a.initNeuron(3, "tanh")
 	a.calculateOutput([]float64{1.0, -1.0, 2.0})
 
 	b := Neuron{}
-	b.initNeuron(1)
+	b.initNeuron(1, "tanh")
 	b.calculateOutputDeep([]*Value{a.activation})
 
 	output := b.activation
@@ -55,11 +55,11 @@ func neuronTest() {
 
 func layerTest() {
 	var _layer Layer
-	layer := _layer.initLayer(3, 3)
+	layer := _layer.initLayer(3, 3, "tanh")
 	fmt.Println(layer)
 	layer.feedForward([]float64{1.0, -1.0, 2.0})
 	fmt.Println(layer.output)
-	layer2 := _layer.initLayer(3, 1)
+	layer2 := _layer.initLayer(3, 1, "tanh")
 	layer2.feedForwardDeep(layer.output)
 	var value Value
 	loss := value.init(0.0)
@@ -82,8 +82,8 @@ func layerTest2() {
 
 	targets := []float64{1.0, -1.0, -1.0, 1.0}
 	var _layer Layer
-	layer := _layer.initLayer(3, 3)
-	layer2 := _layer.initLayer(3, 1)
+	layer := _layer.initLayer(3, 3, "tanh")
+	layer2 := _layer.initLayer(3, 1, "tanh")
 	var value Value
 	for step := 0; step < 10; step++ {
 
