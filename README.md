@@ -28,9 +28,9 @@ To make sure I do understand the issue, I decided to forgo any external librarie
 - More activation functions (Sigmoid and ReLU)
 - Binary crossentropy
 
-<b>Goml Visualizer (in progress): </b><br><br>
+<b>[Goml Visualizer](https://github.com/vtech6/goml-visualizer) (in progress): </b><br><br>
 ![goml-visualizer](https://github.com/vtech6/goml/blob/main/visualizer.gif) <br>
-The Goml Visualizer was written using [Wails](https://wails.io) with React in Typescript for the frontend. Soon I will make the code public, but I want to make some changes beforehand. Anyway, the gif above is from an early version of the visualizer that shows the dataset after BinaryClassification.<br><br>
+The Goml Visualizer was written using [Wails](https://wails.io) with React in Typescript for the frontend. The gif above is from an early version of the visualizer that shows the dataset after BinaryClassification.<br><br>
 <b>References and inspiration:</b>
 - [Sebastian Lauge's Neural Networks Video](https://www.youtube.com/watch?v=hfMk-kjRv4c)
 - [Andrej Karpathy's Micrograd Breakdown](https://www.youtube.com/watch?v=VMj-3S1tku0)
