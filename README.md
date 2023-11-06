@@ -15,7 +15,8 @@ To make sure I do understand the issue, I decided to forgo any external librarie
 <b>Goal: </b>
 - Multilayer Perceptron (done)
 - Binary classification (done)
-- Support for multiple outputs (Multiple classification) (in progress)
+- Support for multiple outputs (Multiple classification) (halted)
+- Visualization (in progress)
 </body>
 
 <b>Current status:</b>
@@ -29,6 +30,7 @@ To make sure I do understand the issue, I decided to forgo any external librarie
 
 <b>Goml Visualizer (in progress): </b><br><br>
 ![goml-visualizer](https://github.com/vtech6/goml/blob/main/visualizer.gif) <br>
+The Goml Visualizer was written using [Wails](https://wails.io) with React in Typescript for the frontend. Soon I will make the code public, but I want to make some changes beforehand. Anyway, the gif above is from an early version of the visualizer that shows the dataset after BinaryClassification.<br><br>
 <b>References and inspiration:</b>
 - [Sebastian Lauge's Neural Networks Video](https://www.youtube.com/watch?v=hfMk-kjRv4c)
 - [Andrej Karpathy's Micrograd Breakdown](https://www.youtube.com/watch?v=VMj-3S1tku0)
