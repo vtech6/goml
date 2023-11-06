@@ -12,7 +12,7 @@ func Run() {
 	//Currently the network is training and predicting on the whole IRIS set.
 	//Upcoming commits will handle train/test splitting of data and validation
 	//with proper metric such as accuracy.
-	BinaryClassification()
+	Regression()
 }
 
 func BinaryClassification() {
@@ -38,6 +38,7 @@ func BinaryClassification() {
 		verbose:          true,
 		costFunction:     "bce",
 		neuronActivation: "sigmoid",
+		saveOutput:       true,
 	})
 
 	//Accuracy: 100%
@@ -67,6 +68,7 @@ func Regression() {
 		verbose:          true,
 		costFunction:     "mse",
 		neuronActivation: "tanh",
+		saveOutput:       true,
 	})
 
 	//Accuracy: 94%

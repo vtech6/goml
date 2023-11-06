@@ -2,17 +2,10 @@ package network
 
 import (
 	"fmt"
+	"math"
 )
 
-type Input struct {
-	x []float64
-	y []float64
-}
-
-//MLP stands for Multilayer Perceptron which is the model that we will be
-//creating and using. It consists of n-Inputs, m-Hidden-Layers and an Output.
-
-type MLP struct {
+type Network struct {
 	layers []*Layer
 }
 
@@ -29,13 +22,14 @@ type NetworkParams struct {
 	verbose          bool
 	costFunction     string
 	neuronActivation string
+	saveOutput       bool
 }
 
 //To initialize MLP we pass it a shape. This is an array that describes how
 //many layers of how many neurons will be in our model.
 //For example shape [2,3,1] would mean 2 inputs, 3 hidden layers and an output.
 
-func (m *MLP) initNetwork(shape []int, learningRate float64, steps int, neuronActivation string) {
+func (m *Network) initNetwork(shape []int, learningRate float64, steps int, neuronActivation string) {
 	var layer Layer
 	m.layers = make([]*Layer, len(shape))
 	for i := 1; i < len(shape); i++ {
@@ -50,7 +44,7 @@ func (m *MLP) initNetwork(shape []int, learningRate float64, steps int, neuronAc
 //input [x1, x2] would be multiplied by weights [w1, w2] of 3 neurons of the
 //hidden layer and return one output Y.
 
-func (m *MLP) calculateOutput(networkInput []float64) []*Value {
+func (m *Network) calculateOutput(networkInput []float64) []*Value {
 	for i := 0; i < len(m.layers)-1; i++ {
 		if i == 0 {
 			m.layers[i].feedForward(networkInput)
@@ -61,7 +55,7 @@ func (m *MLP) calculateOutput(networkInput []float64) []*Value {
 	return m.layers[len(m.layers)-2].output
 }
 
-func (m *MLP) parameters() []*Value {
+func (m *Network) parameters() []*Value {
 	parameters := make([]*Value, 0)
 	for i := 0; i < len(m.layers)-1; i++ {
 		layerParams := m.layers[i].parameters()
@@ -86,8 +80,10 @@ func runNetwork(params NetworkParams) {
 	verbose := params.verbose
 	learningRate := params.learningRate
 	costFunction := params.costFunction
-	network := MLP{}
+	network := Network{}
 	network.initNetwork(shape, learningRate, steps, params.neuronActivation)
+	saveOutput := params.saveOutput
+	var output SavedData
 	//For step in steps we repeat the following process:
 	//1. Feed forward the data
 	//2. Calculate the output
@@ -109,6 +105,7 @@ func runNetwork(params NetworkParams) {
 			fmt.Println("Epoch", epochIndex+1)
 			fmt.Println("---------")
 		}
+		var epochOutputs []float64
 		for batchIndex := range xBatches {
 			inputs := xBatches[batchIndex]
 			targets := yBatches[batchIndex]
@@ -143,6 +140,11 @@ func runNetwork(params NetworkParams) {
 						//change the activation functions (for example from
 						//tanh to sigmoid for Binary Crossentropy etc.)
 					}
+
+					if saveOutput && epochIndex == nEpochs-1 {
+						_val := math.Round(((outputs[0].value - minValue) / (maxValue - minValue)))
+						epochOutputs = append(epochOutputs, _val)
+					}
 				}
 
 				parameters := network.parameters()
@@ -165,6 +167,9 @@ func runNetwork(params NetworkParams) {
 				}
 			}
 		}
+		if saveOutput {
+			output.PredictionsTrain = epochOutputs
+		}
 
 	})
 	fmt.Println("---------")
@@ -177,13 +182,21 @@ func runNetwork(params NetworkParams) {
 	accuracy := 0.0
 	switch costFunction {
 	case "mse":
-		accuracy = regressionMetrics(network, testX, minValue, minMaxScale, testY)
+		accuracy = regressionMetrics(network, testX, minValue, minMaxScale, testY, output, saveOutput)
 	default:
-		accuracy = bceMetrics(network, testX, minValue, minMaxScale, testY)
+		accuracy = bceMetrics(network, testX, minValue, minMaxScale, testY, &output, saveOutput)
 
 	}
 	fmt.Println("--------")
 
 	fmt.Printf("Test accuracy:%.2f%s", accuracy, "%")
+	if saveOutput {
+		output.TestX = testX
+		output.TestY = testY
+		output.TrainX = trainX
+		output.TrainY = trainY
+
+		saveData(output)
+	}
 
 }
