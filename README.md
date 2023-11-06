@@ -1,13 +1,6 @@
 # goml
 Neural Networks from scratch in Go (standard library only)
 
-<body>This repo was created with two goals in mind:
-  
-- Check my understanding of neural networks
-- Verify if Go is the language I would choose when building systems of higher technical and intellectual complexity
-
-To make sure I do understand the issue, I decided to forgo any external libraries and implement all data types and functions myself. To keep track, I will list the limitations and goals below.
-
 <b>Limitations: </b>
 - No external libraries or modules
 - For simplicity, I limit the input shape to (1,x)
