@@ -16,11 +16,11 @@ type SavedData struct {
 	Accuracy         float64
 }
 
-func saveData(data SavedData) {
+func saveData(data SavedData) SavedData {
 	file, error := json.MarshalIndent(data, "", " ")
 	if error != nil {
 		log.Fatal(error)
 	}
-	error = os.WriteFile("IrirsOutput.json", file, 0644)
-
+	error = os.WriteFile("IrisOutput.json", file, 0644)
+	return data
 }
