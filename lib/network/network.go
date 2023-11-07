@@ -68,7 +68,7 @@ func (m *Network) parameters() []*Value {
 	return parameters
 }
 
-func runNetwork(params NetworkParams) {
+func runNetwork(params NetworkParams) *SavedData {
 	nEpochs := params.nEpochs
 	batchSize := params.batchSize
 	trainX := params.trainX
@@ -199,4 +199,5 @@ func runNetwork(params NetworkParams) {
 		saveData(output)
 	}
 
+	return &output
 }

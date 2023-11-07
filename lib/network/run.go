@@ -15,7 +15,7 @@ func Run() {
 	Regression()
 }
 
-func BinaryClassification() {
+func BinaryClassification() *SavedData {
 	trainTestSplitRatio := 0.8
 	targetLabels := [][]float64{{1}, {0}, {0}}
 	trainX, trainY, testX, testY := loadIrisData(trainTestSplitRatio, targetLabels)
@@ -25,7 +25,7 @@ func BinaryClassification() {
 	batchSize := 15
 	nEpochs := 4
 
-	runNetwork(NetworkParams{
+	output := runNetwork(NetworkParams{
 		nEpochs:          nEpochs,
 		batchSize:        batchSize,
 		trainX:           trainX,
@@ -42,10 +42,10 @@ func BinaryClassification() {
 	})
 
 	//Accuracy: 100%
-
+	return output
 }
 
-func Regression() {
+func Regression() *SavedData {
 	trainTestSplitRatio := 0.8
 	targetLabels := [][]float64{{1}, {0}, {-1}}
 	trainX, trainY, testX, testY := loadIrisData(trainTestSplitRatio, targetLabels)
@@ -55,7 +55,7 @@ func Regression() {
 	batchSize := 15
 	nEpochs := 10
 
-	runNetwork(NetworkParams{
+	output := runNetwork(NetworkParams{
 		nEpochs:          nEpochs,
 		batchSize:        batchSize,
 		trainX:           trainX,
@@ -72,4 +72,5 @@ func Regression() {
 	})
 
 	//Accuracy: 94%
+	return output
 }
