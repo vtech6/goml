@@ -22,8 +22,8 @@ Neural Networks from scratch in Go (standard library only)
 - Binary crossentropy
 
 <b>[Goml Visualizer](https://github.com/vtech6/goml-visualizer) (in progress): </b><br><br>
-![goml-visualizer](https://github.com/vtech6/goml/blob/main/visualizer.gif) <br>
-The Goml Visualizer was written using [Wails](https://wails.io) with React in Typescript for the frontend. The gif above is from an early version of the visualizer that shows the dataset after Regression.<br><br>
+![goml-visualizer](https://github.com/vtech6/goml-visualizer/blob/main/testVisualizer.gif) <br><br>
+The Goml Visualizer was written using [Wails](https://wails.io) with React in Typescript for the frontend. The gif above shows the <b>test mode</b>, which allows you to browse your test set and see which values were correctly predicted by the model.<br><br>
 <b>References and inspiration:</b>
 - [Sebastian Lauge's Neural Networks Video](https://www.youtube.com/watch?v=hfMk-kjRv4c)
 - [Andrej Karpathy's Micrograd Breakdown](https://www.youtube.com/watch?v=VMj-3S1tku0)
