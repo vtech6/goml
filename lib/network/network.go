@@ -182,7 +182,7 @@ func runNetwork(params NetworkParams) *SavedData {
 	accuracy := 0.0
 	switch costFunction {
 	case "mse":
-		accuracy = regressionMetrics(network, testX, minValue, minMaxScale, testY, output, saveOutput)
+		accuracy = regressionMetrics(network, testX, minValue, minMaxScale, testY, &output, saveOutput)
 	default:
 		accuracy = bceMetrics(network, testX, minValue, minMaxScale, testY, &output, saveOutput)
 
