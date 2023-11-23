@@ -33,4 +33,4 @@ The Goml Visualizer was written using [Wails](https://wails.io) with React in Ty
 - Make sure you have a valid Go installation by running `go version`
 - Clone the repo
 - Run with `go run .`
-- The network parameters can be tweaked inside the `lib/network/run.go` file. The dataset labels can be changed inside `lib/network/utils.go`. Neuron activation functions can be found under `lib/network/neuron.go` and the engine blocks can be found under `lib/network/model.go`.
+- The network parameters can be tweaked inside the `lib/network/run.go` file. Neuron activation functions can be found under `lib/network/neuron.go` and the engine blocks can be found under `lib/network/value.go`.
