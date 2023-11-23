@@ -85,13 +85,6 @@ func (n *Neuron) parameters() []*Value {
 //The function below builds the tree of variables belonging to this output.
 
 func buildTopo(v *Value, topo *[]*Value) {
-	_topo := *topo
-	for i := 0; i < len(_topo); i++ {
-		for j := 0; j < len(v.children); j++ {
-			if _topo[i] == v.children[j] {
-			}
-		}
-	}
 	for i := 0; i < len(v.children); i++ {
 		*topo = append(*topo, v.children[i])
 		buildTopo(v.children[i], topo)
