@@ -22,8 +22,8 @@ func BinaryClassification() *SavedData {
 	shape := []int{4, 3, 2, 1}
 	learningRate := 0.1
 	steps := 5
-	batchSize := 15
-	nEpochs := 4
+	batchSize := 10
+	nEpochs := 100
 
 	output := runNetwork(NetworkParams{
 		nEpochs:          nEpochs,
